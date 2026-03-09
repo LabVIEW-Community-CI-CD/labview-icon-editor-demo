@@ -23,7 +23,7 @@ jobs:
       DEFAULT_COMPARE_MODES: default,attributes,front-panel,block-diagram
       DEFAULT_MAX_PAIRS: "5"
       DEFAULT_MAX_SIGNAL_PAIRS: "5"
-      FACADE_REF: v1.0.3
+      FACADE_REF: v1.0.4
       COMPAREVI_NI_LINUX_IMAGE: nationalinstruments/labview:2026q1-linux
     steps:
       - name: Validate maintainer command and resolve PR head
@@ -105,7 +105,7 @@ jobs:
 
       - name: Run comparevi-history
         id: history
-        uses: LabVIEW-Community-CI-CD/comparevi-history@v1.0.3
+        uses: LabVIEW-Community-CI-CD/comparevi-history@v1.0.4
         with:
           target_path: ${{ steps.request.outputs['target-path'] }}
           start_ref: ${{ steps.request.outputs['head-sha'] }}
@@ -132,7 +132,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ACTION_REF: LabVIEW-Community-CI-CD/comparevi-history@v1.0.3
+          ACTION_REF: LabVIEW-Community-CI-CD/comparevi-history@v1.0.4
           TARGET_PATH: ${{ steps.request.outputs['target-path'] }}
           REQUESTED_MODES: ${{ steps.history.outputs['requested-mode-list'] }}
           EXECUTED_MODES: ${{ steps.history.outputs['executed-mode-list'] }}
