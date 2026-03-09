@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
   issues: write
-  pull-requests: read
+  pull-requests: write
 
 concurrency:
   group: comparevi-history-${{ github.repository }}-hosted-linux
@@ -126,7 +126,7 @@ jobs:
           path: ${{ steps.history.outputs['results-dir'] }}/**
           if-no-files-found: error
 
-      - name: Post PR comment
+      - name: Publish diagnostics summary
         if: ${{ always() }}
         shell: pwsh
         env:
@@ -153,6 +153,27 @@ jobs:
           }
 
           $runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+          $summaryLines = @(
+            '## comparevi-history comment-gated diagnostics'
+            ''
+            ('- Action ref: `{0}`' -f $env:ACTION_REF)
+            ('- Pull request: `#{0}`' -f $env:ISSUE_NUMBER)
+            ('- Target path: `{0}`' -f $env:TARGET_PATH)
+            ('- Container image: `{0}`' -f $env:COMPAREVI_NI_LINUX_IMAGE)
+            ('- Requested modes: `{0}`' -f $env:REQUESTED_MODES)
+            ('- Executed modes: `{0}`' -f $env:EXECUTED_MODES)
+            ('- Total processed: `{0}`' -f $env:TOTAL_PROCESSED)
+            ('- Total diffs: `{0}`' -f $env:TOTAL_DIFFS)
+            ('- Step conclusion: `{0}`' -f $env:STEP_CONCLUSION)
+            ('- PR head is fork: `{0}`' -f $env:IS_FORK)
+            ('- Run URL: {0}' -f $runUrl)
+            ''
+            '### Mode coverage'
+            ''
+            $env:MODE_SUMMARY_MARKDOWN
+          )
+          $summaryLines | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
           $body = @"
           comparevi-history diagnostics finished for PR #$env:ISSUE_NUMBER.
 
@@ -174,4 +195,28 @@ jobs:
 
           $payload = @{ body = $body } | ConvertTo-Json -Depth 5
           $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/issues/$env:ISSUE_NUMBER/comments"
-          Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $payload -ContentType 'application/json'
+
+          try {
+            Invoke-RestMethod -Method Post -Uri $uri -Headers $headers -Body $payload -ContentType 'application/json' | Out-Null
+            @(
+              ''
+              '- PR comment publication: `posted`'
+            ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          } catch {
+            $statusCode = $null
+            if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+              $statusCode = [int]$_.Exception.Response.StatusCode
+            }
+
+            $permissionDenied = $statusCode -eq 403 -or $_.Exception.Message -match 'Resource not accessible by integration'
+            if (-not $permissionDenied) {
+              throw
+            }
+
+            $warning = 'PR comment publication was denied by the repository token; keeping diagnostics green and relying on the workflow summary and uploaded artifacts.'
+            Write-Warning $warning
+            @(
+              ''
+              ('- PR comment publication: `skipped` ({0})' -f $warning)
+            ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
