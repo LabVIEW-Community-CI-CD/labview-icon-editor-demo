@@ -9,6 +9,7 @@ This directory collects guides and references for working with the LabVIEW Icon 
 - [PowerShell CLI GitHub Action Instructions](powershell-cli-github-action-instructions.md)
 - [PowerShell Dependency Scripts](powershell-dependency-scripts.md)
 - [CI Workflows Overview](ci-workflows.md)
+- [CompareVI History Diagnostics](comparevi-history-diagnostics.md)
 
 ## CI and Advanced Topics
 
