@@ -65,7 +65,8 @@ For additional details and troubleshooting tips, see [INSTALL.md](INSTALL.md).
    - **Build VI Package** – Compiles the source and produces a `.vip` artifact (VI Package).
    - **Run Unit Tests** (now part of the main CI pipeline) – Executes automated tests to verify the Icon Editor’s behavior in a clean LabVIEW environment.
    - **CompareVI History Diagnostics** – Maintainer-triggered workflows can inspect released `comparevi-history`
-     diagnostics for pull requests without exposing the facade to untrusted PR events.
+     diagnostics for pull requests through a checked-in target catalog and action-owned reviewer outputs without
+     exposing the platform to untrusted PR events.
    Additional details on these pipelines are in [CI Workflows](docs/ci-workflows.md) and the [CI Workflow (Multi-Channel Release Support)](docs/powershell-cli-github-action-instructions.md).
 
 ---
@@ -114,7 +115,8 @@ For very large or long-term contributions, NI may use an `experiment/<feature-na
 In-depth documentation and reference guides are located in the `/docs` directory. A complete index is available in [docs/README.md](docs/README.md). Notable documents include:
 
 - **Build & CI Guides:** How to build the Icon Editor and use continuous integration tools. For local setup, see [manual-instructions.md](docs/manual-instructions.md) or the script-driven [automated-setup.md](docs/automated-setup.md). CI pipelines are covered in [CI Workflows](docs/ci-workflows.md) and the [CI Workflow (Multi-Channel Release Support)](docs/powershell-cli-github-action-instructions.md). Reference scripts are listed in [PowerShell Dependency Scripts](docs/powershell-dependency-scripts.md). Packaging and runner configuration are detailed in [Build VI Package](docs/ci/actions/build-vi-package.md) and the [Runner Setup Guide](docs/ci/actions/runner-setup-guide.md).
-- **PR Diagnostics:** Released-ref PR diagnostics guidance for maintainers and downstream forks is documented in
+- **PR Diagnostics:** Released-ref PR diagnostics guidance for maintainers and downstream forks, including the checked-in
+  comparevi-history target catalog and reviewer-surface contract, is documented in
   [CompareVI History Diagnostics](docs/comparevi-history-diagnostics.md).
 - **Composite Actions:** Summary of the repository's reusable GitHub Actions is available in [Composite Actions](docs/ci/actions/README.md).
 - **Advanced Workflows:** Details on complex release processes and branching strategies. For example, the [Multichannel Release Workflow](docs/ci/actions/multichannel-release-workflow.md) explains alpha/beta/RC release branches, and [EXPERIMENTS.md](docs/ci/experiments.md) covers long-running feature branches. Maintainers can refer to the [Maintainer's Guide](docs/ci/actions/maintainers-guide.md) for internal release duties.

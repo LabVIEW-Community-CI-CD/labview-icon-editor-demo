@@ -7,24 +7,24 @@ on:
         description: Pull request number to inspect
         required: true
         type: string
-      target_path:
-        description: Repository-relative VI path to inspect
+      target_id:
+        description: comparevi-history target identifier from .github/comparevi-history-targets.json
         required: true
         type: string
       compare_modes:
-        description: Comma-separated compare mode bundle
+        description: Optional comma-separated explicit mode list override
         required: false
-        default: default,attributes,front-panel,block-diagram
+        default: attributes,front-panel,block-diagram
         type: string
       max_pairs:
         description: Maximum adjacent commit pairs to process
         required: false
-        default: "5"
+        default: '5'
         type: string
       max_signal_pairs:
         description: Maximum surfaced signal pairs
         required: false
-        default: "5"
+        default: '5'
         type: string
 
 permissions:
@@ -72,6 +72,12 @@ jobs:
             "is-fork=$([bool]$pr.head.repo.fork)"
           ) | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      - name: Checkout trusted consumer contract
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          path: trusted-consumer
+
       - name: Pre-pull NI Linux image
         shell: bash
         run: docker pull "$COMPAREVI_NI_LINUX_IMAGE"
@@ -81,14 +87,20 @@ jobs:
         with:
           repository: ${{ steps.pr.outputs['head-repo'] }}
           ref: ${{ steps.pr.outputs['head-sha'] }}
+          path: pr-head
           fetch-depth: 0
 
       - name: Run comparevi-history
         id: history
-        uses: LabVIEW-Community-CI-CD/comparevi-history@v1
+        uses: LabVIEW-Community-CI-CD/comparevi-history@v1.1.0
         with:
-          target_path: ${{ inputs.target_path }}
+          repository_root: pr-head
+          target_spec_path: ${{ github.workspace }}/trusted-consumer/.github/comparevi-history-targets.json
+          target_id: ${{ inputs.target_id }}
           start_ref: ${{ steps.pr.outputs['head-sha'] }}
+          source_branch_ref: ${{ steps.pr.outputs['head-ref'] }}
+          consumer_repository: ${{ steps.pr.outputs['head-repo'] }}
+          consumer_ref: ${{ steps.pr.outputs['head-sha'] }}
           mode: ${{ inputs.compare_modes }}
           max_pairs: ${{ inputs.max_pairs }}
           max_signal_pairs: ${{ inputs.max_signal_pairs }}
@@ -96,7 +108,11 @@ jobs:
           detailed: true
           fail_on_diff: false
           results_dir: tests/results/pr-diagnostics/history
-          invoke_script_path: Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1
+          reviewer_surface: manual
+          reviewer_pull_request_number: ${{ inputs.pull_request_number }}
+          reviewer_is_fork: ${{ steps.pr.outputs['is-fork'] }}
+          container_image: ${{ env.COMPAREVI_NI_LINUX_IMAGE }}
+          invoke_script_path: ${{ github.workspace }}/trusted-consumer/Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1
 
       - name: Upload diagnostics artifacts
         if: ${{ always() && steps.history.outputs['results-dir'] != '' }}
@@ -106,41 +122,15 @@ jobs:
           path: ${{ steps.history.outputs['results-dir'] }}/**
           if-no-files-found: error
 
-      - name: Summarize diagnostics
-        if: ${{ always() }}
+      - name: Append action-owned step summary
+        if: ${{ always() && steps.history.outputs['public-step-summary-path'] != '' }}
         shell: pwsh
         env:
-          ACTION_REF: LabVIEW-Community-CI-CD/comparevi-history@v1
-          PR_NUMBER: ${{ inputs.pull_request_number }}
-          TARGET_PATH: ${{ inputs.target_path }}
-          REQUESTED_MODES: ${{ steps.history.outputs['requested-mode-list'] }}
-          EXECUTED_MODES: ${{ steps.history.outputs['executed-mode-list'] }}
-          TOTAL_PROCESSED: ${{ steps.history.outputs['total-processed'] }}
-          TOTAL_DIFFS: ${{ steps.history.outputs['total-diffs'] }}
-          RESULTS_DIR: ${{ steps.history.outputs['results-dir'] }}
-          MODE_SUMMARY_MARKDOWN: ${{ steps.history.outputs['mode-summary-markdown'] }}
-          IS_FORK: ${{ steps.pr.outputs['is-fork'] }}
+          PUBLIC_STEP_SUMMARY_PATH: ${{ steps.history.outputs['public-step-summary-path'] }}
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
-
-          $runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
-          @(
-            '## comparevi-history manual PR diagnostics'
-            ''
-            ('- Action ref: `{0}`' -f $env:ACTION_REF)
-            ('- Pull request: `#{0}`' -f $env:PR_NUMBER)
-            ('- Target path: `{0}`' -f $env:TARGET_PATH)
-            ('- Container image: `{0}`' -f $env:COMPAREVI_NI_LINUX_IMAGE)
-            ('- Requested modes: `{0}`' -f $env:REQUESTED_MODES)
-            ('- Executed modes: `{0}`' -f $env:EXECUTED_MODES)
-            ('- Total processed: `{0}`' -f $env:TOTAL_PROCESSED)
-            ('- Total diffs: `{0}`' -f $env:TOTAL_DIFFS)
-            ('- Results dir: `{0}`' -f $env:RESULTS_DIR)
-            ('- PR head is fork: `{0}`' -f $env:IS_FORK)
-            ('- Run URL: {0}' -f $runUrl)
-            ''
-            '### Mode coverage'
-            ''
-            $env:MODE_SUMMARY_MARKDOWN
-          ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          if (-not (Test-Path -LiteralPath $env:PUBLIC_STEP_SUMMARY_PATH -PathType Leaf)) {
+            throw "comparevi-history public step summary was missing: $($env:PUBLIC_STEP_SUMMARY_PATH)"
+          }
+          Get-Content -LiteralPath $env:PUBLIC_STEP_SUMMARY_PATH -Raw | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
