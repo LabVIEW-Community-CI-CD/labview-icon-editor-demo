@@ -1,26 +1,36 @@
 # CompareVI History Diagnostics
 
-This repository can consume `comparevi-history` as a released diagnostics facade for pull-request review without
-running that facade directly from untrusted PR events.
+This repository consumes `comparevi-history` as the canonical released VI history platform surface for pull-request
+review without running that platform directly from untrusted PR events.
 
 ## Workflows
 
 - [`.github/workflows/comparevi-history-manual-pr-diagnostics.yml`](../.github/workflows/comparevi-history-manual-pr-diagnostics.yml)
-  is a maintainer-dispatched workflow for inspecting a specific pull request and repository-relative VI path on demand.
+  is a maintainer-dispatched workflow for inspecting a specific pull request and checked-in comparevi-history target id
+  on demand.
 - [`.github/workflows/comparevi-history-comment-gated.yml`](../.github/workflows/comparevi-history-comment-gated.yml)
   is a maintainer-only slash-command workflow that runs when a trusted maintainer comments
-  `/comparevi-history <repository-relative-vi-path> [--modes comma,list]` on a pull request.
+  `/comparevi-history <target-id> [--modes attributes,front-panel,block-diagram]` on a pull request.
+- [`.github/comparevi-history-targets.json`](../.github/comparevi-history-targets.json) is the repo-owned target
+  catalog that declares which VI history targets this consumer exposes.
 
 Both workflows:
 
 - use released `LabVIEW-Community-CI-CD/comparevi-history` refs only
+- pin the immutable release `LabVIEW-Community-CI-CD/comparevi-history@v1.1.0`
 - run on `ubuntu-latest`
 - pre-pull `nationalinstruments/labview:2026q1-linux` under a repo-level concurrency group so image acquisition and
   compare execution stay serialized
 - resolve the PR head repository and SHA dynamically
-- use the repo-local `Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1` adapter as a maintainer-controlled
+- check out the trusted base repository to supply `.github/comparevi-history-targets.json` and the hosted invoke adapter
+- check out the PR head into a separate path so only the inspected content comes from the untrusted branch or fork
+- route requests through the trusted target catalog checkout instead of the PR head checkout
+- use only explicit public compare modes: `attributes`, `front-panel`, and `block-diagram`
+- use the trusted repo-local `Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1` adapter as a maintainer-controlled
   `invoke_script_path`
-- upload diagnostics artifacts plus reviewer-facing mode summaries
+- upload diagnostics artifacts
+- append the action-owned `public-step-summary-path`
+- publish the action-owned `public-comment-path` for comment-gated reviewer flows
 
 ## Release Contract
 
@@ -31,7 +41,10 @@ Both workflows:
 - Consumer workflows here should not set maintainer-only backend override inputs such as `comparevi_repository` or
   `comparevi_ref`.
 - The hosted invoke adapter resolves `Run-NILinuxContainerCompare.ps1` from `COMPAREVI_SCRIPTS_ROOT`, which is exported
-  by the released facade while it runs the released backend bundle.
+  by the released platform while it runs the released backend bundle.
+- Reviewer-facing consumers in this repository should rely on the action-owned outputs
+  `public-comment-path`, `public-step-summary-path`, `public-run-path`, and `history-summary-json` instead of
+  rebuilding markdown inline.
 
 ## Upstream and Fork Alignment
 
@@ -41,15 +54,21 @@ Both workflows:
 - The workflows are repo-local by design: they query the pull request from the current repository, then check out the
   PR head repo and SHA exactly as reported by the GitHub API.
 
+## Target Catalog
+
+- Current default target id: `vip-post-install-custom-action`
+- Current target path: `Tooling/deployment/VIP_Post-Install Custom Action.vi`
+- Public reviewer command: `/comparevi-history vip-post-install-custom-action --modes attributes,front-panel,block-diagram`
+- Branch-budget policy is bounded in the checked-in target catalog, not assembled ad hoc in workflows.
+
 ## Recommended Usage
 
 1. Start with the manual workflow when you want a low-risk maintainer-controlled diagnostics path.
-2. Use a stable VI path such as `Tooling/deployment/VIP_Post-Install Custom Action.vi` while validating hosted-runner
-   and trust behavior.
-3. Add the comment-gated workflow once maintainers are comfortable triggering diagnostics from PR comments on the
+2. Use target id `vip-post-install-custom-action` while validating hosted-runner and trust behavior.
+3. Use the comment-gated workflow once maintainers are comfortable triggering diagnostics from PR comments on the
    hosted runner under maintainer-only command gating.
-4. Keep the default mode bundle `default,attributes,front-panel,block-diagram` unless there is a documented reason to
-   narrow it.
+4. Keep the explicit public mode bundle `attributes,front-panel,block-diagram` unless there is a documented reason to
+   narrow it further.
 
 ## See Also
 

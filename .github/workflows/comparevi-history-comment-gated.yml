@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      DEFAULT_COMPARE_MODES: default,attributes,front-panel,block-diagram
-      DEFAULT_MAX_PAIRS: "5"
-      DEFAULT_MAX_SIGNAL_PAIRS: "5"
-      FACADE_REF: v1.0.4
+      DEFAULT_COMPARE_MODES: attributes,front-panel,block-diagram
+      DEFAULT_MAX_PAIRS: '5'
+      DEFAULT_MAX_SIGNAL_PAIRS: '5'
+      FACADE_REF: v1.1.0
       COMPAREVI_NI_LINUX_IMAGE: nationalinstruments/labview:2026q1-linux
     steps:
       - name: Validate maintainer command and resolve PR head
@@ -51,20 +51,20 @@ jobs:
 
           $remainder = $command.Substring($prefix.Length).Trim()
           if ([string]::IsNullOrWhiteSpace($remainder)) {
-            throw 'Usage: /comparevi-history <repository-relative-vi-path> [--modes comma,list]'
+            throw 'Usage: /comparevi-history <target-id> [--modes attributes,front-panel,block-diagram]'
           }
 
-          $targetPath = $remainder
+          $targetId = $remainder
           $compareModes = $env:DEFAULT_COMPARE_MODES
           $modeMarker = ' --modes '
           $modeIndex = $remainder.IndexOf($modeMarker, [System.StringComparison]::OrdinalIgnoreCase)
           if ($modeIndex -ge 0) {
-            $targetPath = $remainder.Substring(0, $modeIndex).Trim()
+            $targetId = $remainder.Substring(0, $modeIndex).Trim()
             $compareModes = $remainder.Substring($modeIndex + $modeMarker.Length).Trim()
           }
 
-          if ([string]::IsNullOrWhiteSpace($targetPath)) {
-            throw 'The slash command must include a repository-relative VI path.'
+          if ([string]::IsNullOrWhiteSpace($targetId)) {
+            throw 'The slash command must include a comparevi-history target identifier.'
           }
           if ([string]::IsNullOrWhiteSpace($compareModes)) {
             $compareModes = $env:DEFAULT_COMPARE_MODES
@@ -84,13 +84,19 @@ jobs:
           }
 
           @(
-            "target-path=$targetPath"
+            "target-id=$targetId"
             "compare-modes=$compareModes"
             "head-repo=$($pr.head.repo.full_name)"
             "head-sha=$($pr.head.sha)"
             "head-ref=$($pr.head.ref)"
             "is-fork=$([bool]$pr.head.repo.fork)"
           ) | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Checkout trusted consumer contract
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          path: trusted-consumer
 
       - name: Pre-pull NI Linux image
         shell: bash
@@ -101,14 +107,20 @@ jobs:
         with:
           repository: ${{ steps.request.outputs['head-repo'] }}
           ref: ${{ steps.request.outputs['head-sha'] }}
+          path: pr-head
           fetch-depth: 0
 
       - name: Run comparevi-history
         id: history
-        uses: LabVIEW-Community-CI-CD/comparevi-history@v1.0.4
+        uses: LabVIEW-Community-CI-CD/comparevi-history@v1.1.0
         with:
-          target_path: ${{ steps.request.outputs['target-path'] }}
+          repository_root: pr-head
+          target_spec_path: ${{ github.workspace }}/trusted-consumer/.github/comparevi-history-targets.json
+          target_id: ${{ steps.request.outputs['target-id'] }}
           start_ref: ${{ steps.request.outputs['head-sha'] }}
+          source_branch_ref: ${{ steps.request.outputs['head-ref'] }}
+          consumer_repository: ${{ steps.request.outputs['head-repo'] }}
+          consumer_ref: ${{ steps.request.outputs['head-sha'] }}
           mode: ${{ steps.request.outputs['compare-modes'] }}
           max_pairs: ${{ env.DEFAULT_MAX_PAIRS }}
           max_signal_pairs: ${{ env.DEFAULT_MAX_SIGNAL_PAIRS }}
@@ -116,7 +128,12 @@ jobs:
           detailed: true
           fail_on_diff: false
           results_dir: tests/results/pr-diagnostics/history
-          invoke_script_path: Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1
+          reviewer_surface: comment-gated
+          reviewer_issue_number: ${{ github.event.issue.number }}
+          reviewer_pull_request_number: ${{ github.event.issue.number }}
+          reviewer_is_fork: ${{ steps.request.outputs['is-fork'] }}
+          container_image: ${{ env.COMPAREVI_NI_LINUX_IMAGE }}
+          invoke_script_path: ${{ github.workspace }}/trusted-consumer/Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1
 
       - name: Upload diagnostics artifacts
         if: ${{ always() && steps.history.outputs['results-dir'] != '' }}
@@ -126,21 +143,27 @@ jobs:
           path: ${{ steps.history.outputs['results-dir'] }}/**
           if-no-files-found: error
 
-      - name: Publish diagnostics summary
-        if: ${{ always() }}
+      - name: Append action-owned step summary
+        if: ${{ always() && steps.history.outputs['public-step-summary-path'] != '' }}
+        shell: pwsh
+        env:
+          PUBLIC_STEP_SUMMARY_PATH: ${{ steps.history.outputs['public-step-summary-path'] }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path -LiteralPath $env:PUBLIC_STEP_SUMMARY_PATH -PathType Leaf)) {
+            throw "comparevi-history public step summary was missing: $($env:PUBLIC_STEP_SUMMARY_PATH)"
+          }
+          Get-Content -LiteralPath $env:PUBLIC_STEP_SUMMARY_PATH -Raw | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+
+      - name: Publish diagnostics PR comment
+        if: ${{ always() && steps.history.outputs['public-comment-path'] != '' }}
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ACTION_REF: LabVIEW-Community-CI-CD/comparevi-history@v1.0.4
-          TARGET_PATH: ${{ steps.request.outputs['target-path'] }}
-          REQUESTED_MODES: ${{ steps.history.outputs['requested-mode-list'] }}
-          EXECUTED_MODES: ${{ steps.history.outputs['executed-mode-list'] }}
-          TOTAL_PROCESSED: ${{ steps.history.outputs['total-processed'] }}
-          TOTAL_DIFFS: ${{ steps.history.outputs['total-diffs'] }}
-          MODE_SUMMARY_MARKDOWN: ${{ steps.history.outputs['mode-summary-markdown'] }}
-          STEP_CONCLUSION: ${{ steps.history.conclusion }}
-          IS_FORK: ${{ steps.request.outputs['is-fork'] }}
+          ACTION_REF: LabVIEW-Community-CI-CD/comparevi-history@v1.1.0
+          COMMENT_PATH: ${{ steps.history.outputs['public-comment-path'] }}
         run: |
           Set-StrictMode -Version Latest
           $ErrorActionPreference = 'Stop'
@@ -152,47 +175,11 @@ jobs:
             'X-GitHub-Api-Version' = '2022-11-28'
           }
 
-          $runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
-          $summaryLines = @(
-            '## comparevi-history comment-gated diagnostics'
-            ''
-            ('- Action ref: `{0}`' -f $env:ACTION_REF)
-            ('- Pull request: `#{0}`' -f $env:ISSUE_NUMBER)
-            ('- Target path: `{0}`' -f $env:TARGET_PATH)
-            ('- Container image: `{0}`' -f $env:COMPAREVI_NI_LINUX_IMAGE)
-            ('- Requested modes: `{0}`' -f $env:REQUESTED_MODES)
-            ('- Executed modes: `{0}`' -f $env:EXECUTED_MODES)
-            ('- Total processed: `{0}`' -f $env:TOTAL_PROCESSED)
-            ('- Total diffs: `{0}`' -f $env:TOTAL_DIFFS)
-            ('- Step conclusion: `{0}`' -f $env:STEP_CONCLUSION)
-            ('- PR head is fork: `{0}`' -f $env:IS_FORK)
-            ('- Run URL: {0}' -f $runUrl)
-            ''
-            '### Mode coverage'
-            ''
-            $env:MODE_SUMMARY_MARKDOWN
-          )
-          $summaryLines | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          if (-not (Test-Path -LiteralPath $env:COMMENT_PATH -PathType Leaf)) {
+            throw "comparevi-history public comment body was missing: $($env:COMMENT_PATH)"
+          }
 
-          $body = @"
-          comparevi-history diagnostics finished for PR #$env:ISSUE_NUMBER.
-
-          - Action ref: `$env:ACTION_REF`
-          - Target path: `$env:TARGET_PATH`
-          - Container image: `$env:COMPAREVI_NI_LINUX_IMAGE`
-          - Requested modes: `$env:REQUESTED_MODES`
-          - Executed modes: `$env:EXECUTED_MODES`
-          - Total processed: `$env:TOTAL_PROCESSED`
-          - Total diffs: `$env:TOTAL_DIFFS`
-          - Step conclusion: `$env:STEP_CONCLUSION`
-          - PR head is fork: `$env:IS_FORK`
-
-          ### Mode coverage
-          $env:MODE_SUMMARY_MARKDOWN
-
-          - Run: $runUrl
-          "@.Trim()
-
+          $body = Get-Content -LiteralPath $env:COMMENT_PATH -Raw
           $payload = @{ body = $body } | ConvertTo-Json -Depth 5
           $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/issues/$env:ISSUE_NUMBER/comments"
 

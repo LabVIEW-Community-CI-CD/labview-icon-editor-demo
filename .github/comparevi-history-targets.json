@@ -1,0 +1,27 @@
+{
+  "schema": "comparevi-history/consumer-targets@v1",
+  "defaultTargetId": "vip-post-install-custom-action",
+  "targets": [
+    {
+      "id": "vip-post-install-custom-action",
+      "path": "Tooling/deployment/VIP_Post-Install Custom Action.vi",
+      "publicModes": [
+        "attributes",
+        "front-panel",
+        "block-diagram"
+      ],
+      "history": {
+        "branchBudget": {
+          "maxCommitCount": 64
+        }
+      },
+      "reviewerSurface": {
+        "variants": [
+          "manual",
+          "comment-gated"
+        ],
+        "commentCommand": "/comparevi-history vip-post-install-custom-action --modes attributes,front-panel,block-diagram"
+      }
+    }
+  ]
+}
