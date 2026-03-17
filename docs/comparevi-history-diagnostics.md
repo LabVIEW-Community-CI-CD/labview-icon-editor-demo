@@ -9,7 +9,7 @@ review without running that platform directly from untrusted PR events.
   is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
   `compare_modes`, `include_merge_parents`, and `noise_policy`, and pins both the reusable workflow ref and
-  `platform_ref` to `v1.3.2`.
+  `platform_ref` to `v1.3.4`.
 - [`.github/workflows/comparevi-history-manual-pr-diagnostics.yml`](../.github/workflows/comparevi-history-manual-pr-diagnostics.yml)
   is a maintainer-dispatched workflow for inspecting a specific pull request and checked-in comparevi-history target id
   on demand.
@@ -22,9 +22,12 @@ review without running that platform directly from untrusted PR events.
 The manual exploration workflow:
 
 - pins the immutable reusable workflow
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.3.2`
-- keeps `platform_ref` aligned with the workflow pin at `v1.3.2`
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.3.4`
+- keeps `platform_ref` aligned with the workflow pin at `v1.3.4`
 - accepts repo-relative `vi_path` input plus `ref`, `compare_modes`, `include_merge_parents`, and `noise_policy`
+- defaults to the trusted raw exploration profile:
+  - `compare_modes: full`
+  - `noise_policy: include`
 - uploads `revision-catalog.json`, `exploration-run.json`, `index.md`, `index.html`, `timeline.md`, `timeline.html`,
   and `manual-vi-exploration-bundle.zip`
 - appends the reusable workflow summary to the workflow run
