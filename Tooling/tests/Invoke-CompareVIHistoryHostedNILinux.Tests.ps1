@@ -41,6 +41,7 @@ New-Item -ItemType Directory -Path $outDir -Force | Out-Null
   schema = 'ni-linux-container-compare/v1'
   command = 'docker run test'
   exitCode = 1
+  seconds = 3.25
   isDiff = $true
   reportPath = $ReportPath
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $outDir 'ni-linux-container-capture.json') -Encoding utf8
@@ -48,6 +49,7 @@ if ($PassThru) {
   [pscustomobject]@{
     command = 'docker run test'
     exitCode = 1
+    seconds = 3.25
     isDiff = $true
   }
 }
@@ -75,6 +77,7 @@ exit 1
 
             $capture = Get-Content -LiteralPath $capturePath -Raw | ConvertFrom-Json -Depth 10
             $capture.exitCode | Should -Be 1
+            $capture.seconds | Should -Be 3.25
             $capture.diff | Should -BeTrue
             $capture.cliPath | Should -Be 'docker:nationalinstruments/labview:2026q1-linux'
             $capture.environment.cli.artifacts.reportSizeBytes | Should -BeGreaterThan 0
