@@ -105,6 +105,7 @@ Describe 'CompareVI History workflow contracts' {
         $script:corpusPilotWorkflow | Should -Match 'Tooling/deployment/VIP_Pre-Install Custom Action\.vi'
         $script:corpusPilotWorkflow | Should -Match 'corpus-index\.json'
         $script:corpusPilotWorkflow | Should -Match 'downstream-processing-manifest\.json'
+        $script:corpusPilotWorkflow | Should -Match 'completeness\.isComplete'
         $script:corpusPilotWorkflow | Should -Match 'comparevi-history-corpus-evidence-pilot-\$\{\{ github\.run_id \}\}'
         $script:corpusPilotWorkflow | Should -Not -Match 'comparevi_repository:'
         $script:corpusPilotWorkflow | Should -Not -Match 'comparevi_ref:'
