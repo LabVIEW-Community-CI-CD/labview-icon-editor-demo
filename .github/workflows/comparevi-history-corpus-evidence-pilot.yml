@@ -215,8 +215,8 @@ jobs:
           if ([string]$corpusIndex.paging.continuationMode -ne 'page-ordinal') {
             throw "Unexpected continuation mode: $($corpusIndex.paging.continuationMode)"
           }
-          if (-not [bool]$corpusIndex.corpus.complete) {
-            throw "Corpus pilot failed closed with corpus.complete=$($corpusIndex.corpus.complete) and reason '$($corpusIndex.corpus.reason)'."
+          if (-not [bool]$corpusIndex.completeness.isComplete) {
+            throw "Corpus pilot failed closed with completeness.isComplete=$($corpusIndex.completeness.isComplete) and reason '$($corpusIndex.completeness.reason)'."
           }
 
           $observedTargetPaths = @($corpusIndex.targets | ForEach-Object { [string]$_.targetPath })
