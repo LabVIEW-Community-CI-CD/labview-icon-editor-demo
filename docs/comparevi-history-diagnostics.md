@@ -8,11 +8,12 @@ review without running that platform directly from untrusted PR events.
 - [`.github/workflows/comparevi-history-pull-request-diagnostics.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics.yml)
   is the standard automatic changed-VI pull-request surface. It stays thin by forwarding the current repository and the
   checked-in `.github/comparevi-history-pr-policy.json` contract into the reusable
-  `comparevi-history` execution workflow pinned to the immutable platform commit
-  `d0e92af4f36da76c946a194efe4c2cc79590629d`.
+  `comparevi-history` execution workflow pinned to the immutable release
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.9`.
 - [`.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml)
   is the privileged `workflow_run` follow-on publisher. It reads the execution artifact from the completed pull request
-  run and creates or updates the sticky PR comment without checking out or executing candidate PR code.
+  run and creates or updates the sticky PR comment without checking out or executing candidate PR code through
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@v1.3.9`.
 - [`.github/workflows/comparevi-history-manual-vi-exploration.yml`](../.github/workflows/comparevi-history-manual-vi-exploration.yml)
   is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
@@ -41,6 +42,8 @@ The automatic changed-VI pull-request surface:
 
 - is additive and leaves the manual PR diagnostics, comment-gated diagnostics, manual exploration, corpus pilot, and
   checked-in target catalog unchanged
+- consumes the released `LabVIEW-Community-CI-CD/comparevi-history@v1.3.9` platform surface through the reusable
+  workflow entrypoints
 - triggers on `pull_request` for `main`, `develop`, `release/*`, `feature/*`, and `hotfix/*`
 - discovers changed `.vi` files through `comparevi-history/changed-vi-discovery@v2` using the trusted base-branch
   policy checkout instead of a PR-local script
@@ -127,8 +130,7 @@ unchanged and continue to use the checked-in target catalog.
 ## Release Contract
 
 - Consumer workflows in this repository must pin immutable `comparevi-history` refs only.
-- The automatic changed-VI PR wrappers currently pin the immutable platform commit
-  `d0e92af4f36da76c946a194efe4c2cc79590629d` until the next released tag includes the new reusable workflows.
+- The automatic changed-VI PR wrappers pin the released reusable workflow surface and `platform_ref` to `v1.3.9`.
 - Consumers in this repository must not pin `compare-vi-cli-action` directly.
 - The normal released `comparevi-history` path already resolves its backend from the released
   `compare-vi-cli-action` bundle mapping.
