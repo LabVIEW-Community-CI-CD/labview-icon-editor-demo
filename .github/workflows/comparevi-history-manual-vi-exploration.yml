@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   comparevi-history-manual-vi-exploration:
-    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.3.3
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.3.4
     with:
       consumer_repository: ${{ github.repository }}
       consumer_ref: ${{ inputs.ref }}
@@ -41,4 +41,4 @@ jobs:
       modes: ${{ inputs.compare_modes }}
       include_merge_parents: ${{ inputs.include_merge_parents }}
       noise_policy: ${{ inputs.noise_policy }}
-      platform_ref: v1.3.3
+      platform_ref: v1.3.4
