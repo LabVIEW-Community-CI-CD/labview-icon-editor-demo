@@ -153,6 +153,27 @@ function Copy-IfExists {
     return $true
 }
 
+function Resolve-NormalizedCaptureSeconds {
+    param([AllowNull()][psobject]$RunnerCapture)
+
+    if ($null -eq $RunnerCapture) {
+        return [double]0
+    }
+
+    foreach ($propertyName in @('seconds', 'durationSeconds', 'elapsedSeconds')) {
+        if ($RunnerCapture.PSObject.Properties[$propertyName]) {
+            try {
+                return [double]$RunnerCapture.$propertyName
+            }
+            catch {
+                return [double]0
+            }
+        }
+    }
+
+    return [double]0
+}
+
 function New-NormalizedCapture {
     param(
         [AllowNull()][psobject]$RunnerCapture,
@@ -173,6 +194,7 @@ function New-NormalizedCapture {
     }
 
     $isDiff = $false
+    $seconds = Resolve-NormalizedCaptureSeconds -RunnerCapture $RunnerCapture
     if ($null -ne $RunnerCapture) {
         if ($RunnerCapture.PSObject.Properties['diff']) {
             $isDiff = [bool]$RunnerCapture.diff
@@ -189,6 +211,7 @@ function New-NormalizedCapture {
         command = if ($null -ne $RunnerCapture -and $RunnerCapture.PSObject.Properties['command']) { [string]$RunnerCapture.command } else { '' }
         cliPath = "docker:$Image"
         exitCode = if ($null -ne $RunnerCapture -and $RunnerCapture.PSObject.Properties['exitCode']) { [int]$RunnerCapture.exitCode } else { $null }
+        seconds = $seconds
         diff = $isDiff
         isDiff = $isDiff
         base = $BaseViPath
