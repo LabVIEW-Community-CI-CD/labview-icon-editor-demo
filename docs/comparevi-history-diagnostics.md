@@ -5,6 +5,11 @@ review without running that platform directly from untrusted PR events.
 
 ## Workflows
 
+- [`.github/workflows/comparevi-history-manual-vi-exploration.yml`](../.github/workflows/comparevi-history-manual-vi-exploration.yml)
+  is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
+  reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
+  `compare_modes`, `include_merge_parents`, and `noise_policy`, and pins both the reusable workflow ref and
+  `platform_ref` to `v1.2.0`.
 - [`.github/workflows/comparevi-history-manual-pr-diagnostics.yml`](../.github/workflows/comparevi-history-manual-pr-diagnostics.yml)
   is a maintainer-dispatched workflow for inspecting a specific pull request and checked-in comparevi-history target id
   on demand.
@@ -14,7 +19,16 @@ review without running that platform directly from untrusted PR events.
 - [`.github/comparevi-history-targets.json`](../.github/comparevi-history-targets.json) is the repo-owned target
   catalog that declares which VI history targets this consumer exposes.
 
-Both workflows:
+The manual exploration workflow:
+
+- pins the immutable reusable workflow
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.2.0`
+- keeps `platform_ref` aligned with the workflow pin at `v1.2.0`
+- accepts repo-relative `vi_path` input plus `ref`, `compare_modes`, `include_merge_parents`, and `noise_policy`
+- uploads the Phase 1 `revision-catalog.json` artifact and appends the reusable workflow summary to the workflow run
+- does not add repo-local history discovery, chunk orchestration, or renderer logic
+
+The PR diagnostics workflows:
 
 - use released `LabVIEW-Community-CI-CD/comparevi-history` refs only
 - pin the immutable release `LabVIEW-Community-CI-CD/comparevi-history@v1.1.0`
@@ -31,6 +45,9 @@ Both workflows:
 - upload diagnostics artifacts
 - append the action-owned `public-step-summary-path`
 - publish the action-owned `public-comment-path` for comment-gated reviewer flows
+
+The manual exploration path is additive. Existing target-id PR diagnostics remain unchanged and continue to use the
+checked-in target catalog.
 
 ## Release Contract
 
@@ -69,6 +86,8 @@ Both workflows:
    hosted runner under maintainer-only command gating.
 4. Keep the explicit public mode bundle `attributes,front-panel,block-diagram` unless there is a documented reason to
    narrow it further.
+5. Use the manual VI exploration workflow when you want the full available revision catalog for a specific repo-relative
+   `.vi` path rather than the curated target-id diagnostics contract.
 
 ## See Also
 
