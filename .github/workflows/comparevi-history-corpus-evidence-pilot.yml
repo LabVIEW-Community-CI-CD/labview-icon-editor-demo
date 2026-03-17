@@ -219,7 +219,7 @@ jobs:
             throw "Corpus pilot failed closed with completeness.isComplete=$($corpusIndex.completeness.isComplete) and reason '$($corpusIndex.completeness.reason)'."
           }
 
-          $observedTargetPaths = @($corpusIndex.targets | ForEach-Object { [string]$_.targetPath })
+          $observedTargetPaths = @($corpusIndex.targetDigests | ForEach-Object { [string]$_.path })
           foreach ($expectedTargetPath in @(
             'Tooling/deployment/VIP_Post-Install Custom Action.vi',
             'Tooling/deployment/VIP_Pre-Install Custom Action.vi'
