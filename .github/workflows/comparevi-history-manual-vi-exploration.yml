@@ -13,9 +13,9 @@ on:
         default: develop
         type: string
       compare_modes:
-        description: Reserved explicit compare mode bundle for later execution phases
+        description: Trusted raw compare mode bundle for manual exploration
         required: false
-        default: attributes,front-panel,block-diagram
+        default: full
         type: string
       include_merge_parents:
         description: Walk merge parents alongside the mainline when building the revision catalog
@@ -23,9 +23,9 @@ on:
         default: false
         type: boolean
       noise_policy:
-        description: Reserved noise policy for later execution phases
+        description: Trusted noise policy for manual exploration
         required: false
-        default: collapse
+        default: include
         type: string
 
 permissions:
@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   comparevi-history-manual-vi-exploration:
-    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.2.0
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/manual-vi-exploration.yml@v1.3.6
     with:
       consumer_repository: ${{ github.repository }}
       consumer_ref: ${{ inputs.ref }}
@@ -41,4 +41,4 @@ jobs:
       modes: ${{ inputs.compare_modes }}
       include_merge_parents: ${{ inputs.include_merge_parents }}
       noise_policy: ${{ inputs.noise_policy }}
-      platform_ref: v1.2.0
+      platform_ref: v1.3.6
