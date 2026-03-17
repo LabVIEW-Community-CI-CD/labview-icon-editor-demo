@@ -10,6 +10,12 @@ review without running that platform directly from untrusted PR events.
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
   `compare_modes`, `include_merge_parents`, and `noise_policy`, and pins both the reusable workflow ref and
   `platform_ref` to `v1.3.7`.
+- [`.github/workflows/comparevi-history-corpus-evidence-pilot.yml`](../.github/workflows/comparevi-history-corpus-evidence-pilot.yml)
+  is a maintainer-dispatched workflow that proves the corpus evidence contracts against the released
+  `comparevi-history` platform without adding repo-local corpus logic. It runs the released platform scripts for the
+  fixed seed targets:
+  - `Tooling/deployment/VIP_Post-Install Custom Action.vi`
+  - `Tooling/deployment/VIP_Pre-Install Custom Action.vi`
 - [`.github/workflows/comparevi-history-manual-pr-diagnostics.yml`](../.github/workflows/comparevi-history-manual-pr-diagnostics.yml)
   is a maintainer-dispatched workflow for inspecting a specific pull request and checked-in comparevi-history target id
   on demand.
@@ -32,6 +38,30 @@ The manual exploration workflow:
   and `manual-vi-exploration-bundle.zip`
 - appends the reusable workflow summary to the workflow run
 - does not add repo-local history discovery, chunk orchestration, or renderer logic
+
+The corpus evidence pilot workflow:
+
+- pins `LabVIEW-Community-CI-CD/comparevi-history@v1.3.8` by checking out the published platform repository at
+  `v1.3.8`
+- accepts only `ref` as operator input; the VI target set is fixed for this pilot
+- reuses the released platform scripts for:
+  - revision catalog discovery
+  - chunk planning
+  - chunk execution
+  - manual exploration aggregation
+  - bundle publication
+  - corpus aggregation
+- writes one deterministic corpus surface for both seed targets in one run:
+  - `corpus-index.json`
+  - `pages/corpus-page-*.json`
+  - `downstream-processing-manifest.json`
+  - `corpus-pilot-manifest.json`
+- uploads the full pilot results root under
+  `tests/results/ref-compare/history-exploration/corpus-pilot`
+- fails closed unless both seed targets complete and the corpus index reports deterministic `page-ordinal`
+  continuation
+- keeps the consumer wrapper thin by delegating the heavy lifting to the released platform instead of copying repo-local
+  corpus scripts
 
 The PR diagnostics workflows:
 

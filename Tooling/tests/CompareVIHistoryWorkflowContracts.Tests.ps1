@@ -8,6 +8,7 @@ Describe 'CompareVI History workflow contracts' {
         $repoRoot = (Resolve-Path -Path (Join-Path $PSScriptRoot '..\..')).Path
         $script:manualWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-manual-pr-diagnostics.yml'
         $script:manualExplorationWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-manual-vi-exploration.yml'
+        $script:corpusPilotWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-corpus-evidence-pilot.yml'
         $script:commentWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-comment-gated.yml'
         $script:targetCatalogPath = Join-Path $repoRoot '.github/comparevi-history-targets.json'
         $script:docsPath = Join-Path $repoRoot 'docs/comparevi-history-diagnostics.md'
@@ -15,6 +16,7 @@ Describe 'CompareVI History workflow contracts' {
         foreach ($path in @(
             $script:manualWorkflowPath,
             $script:manualExplorationWorkflowPath,
+            $script:corpusPilotWorkflowPath,
             $script:commentWorkflowPath,
             $script:targetCatalogPath,
             $script:docsPath
@@ -26,6 +28,7 @@ Describe 'CompareVI History workflow contracts' {
 
         $script:manualWorkflow = Get-Content -LiteralPath $script:manualWorkflowPath -Raw
         $script:manualExplorationWorkflow = Get-Content -LiteralPath $script:manualExplorationWorkflowPath -Raw
+        $script:corpusPilotWorkflow = Get-Content -LiteralPath $script:corpusPilotWorkflowPath -Raw
         $script:commentWorkflow = Get-Content -LiteralPath $script:commentWorkflowPath -Raw
         $script:targetCatalog = Get-Content -LiteralPath $script:targetCatalogPath -Raw
         $script:docs = Get-Content -LiteralPath $script:docsPath -Raw
@@ -84,6 +87,30 @@ Describe 'CompareVI History workflow contracts' {
         $script:manualExplorationWorkflow | Should -Not -Match 'invoke_script_path:'
     }
 
+    It 'adds a thin corpus pilot workflow pinned to released comparevi-history scripts' {
+        $script:corpusPilotWorkflow | Should -Match 'name:\s+CompareVI History Corpus Evidence Pilot'
+        $script:corpusPilotWorkflow | Should -Match '(?m)^\s*workflow_dispatch:\s*$'
+        $script:corpusPilotWorkflow | Should -Match '(?m)^\s*ref:\s*$'
+        $script:corpusPilotWorkflow | Should -Match 'default:\s+develop'
+        $script:corpusPilotWorkflow | Should -Match 'PLATFORM_REF:\s+v1\.3\.8'
+        $script:corpusPilotWorkflow | Should -Match 'PILOT_RESULTS_ROOT:\s+tests/results/ref-compare/history-exploration/corpus-pilot'
+        $script:corpusPilotWorkflow | Should -Match 'repository:\s+LabVIEW-Community-CI-CD/comparevi-history'
+        $script:corpusPilotWorkflow | Should -Match 'ref:\s+\$\{\{ env\.PLATFORM_REF \}\}'
+        $script:corpusPilotWorkflow | Should -Match 'Write-CompareVIHistoryRevisionCatalog\.ps1'
+        $script:corpusPilotWorkflow | Should -Match 'Invoke-CompareVIHistoryChunkExecution\.ps1'
+        $script:corpusPilotWorkflow | Should -Match 'Write-CompareVIHistoryExplorationRun\.ps1'
+        $script:corpusPilotWorkflow | Should -Match 'Write-CompareVIHistoryExplorationBundle\.ps1'
+        $script:corpusPilotWorkflow | Should -Match 'Write-CompareVIHistoryCorpusIndex\.ps1'
+        $script:corpusPilotWorkflow | Should -Match 'Tooling/deployment/VIP_Post-Install Custom Action\.vi'
+        $script:corpusPilotWorkflow | Should -Match 'Tooling/deployment/VIP_Pre-Install Custom Action\.vi'
+        $script:corpusPilotWorkflow | Should -Match 'corpus-index\.json'
+        $script:corpusPilotWorkflow | Should -Match 'downstream-processing-manifest\.json'
+        $script:corpusPilotWorkflow | Should -Match 'comparevi-history-corpus-evidence-pilot-\$\{\{ github\.run_id \}\}'
+        $script:corpusPilotWorkflow | Should -Not -Match 'comparevi_repository:'
+        $script:corpusPilotWorkflow | Should -Not -Match 'comparevi_ref:'
+        $script:corpusPilotWorkflow | Should -Not -Match 'target_spec_path:'
+    }
+
     It 'keeps the comment-gated workflow on target ids and action-owned comment bodies' {
         $script:commentWorkflow | Should -Match 'FACADE_REF:\s+v1\.1\.0'
         $script:commentWorkflow | Should -Match 'Usage:\s+/comparevi-history <target-id> \[--modes attributes,front-panel,block-diagram\]'
@@ -108,14 +135,20 @@ Describe 'CompareVI History workflow contracts' {
     It 'documents the target catalog and action-owned public outputs' {
         $script:docs | Should -Match '\.github/comparevi-history-targets\.json'
         $script:docs | Should -Match '\.github/workflows/comparevi-history-manual-vi-exploration\.yml'
+        $script:docs | Should -Match '\.github/workflows/comparevi-history-corpus-evidence-pilot\.yml'
         $script:docs | Should -Match 'vip-post-install-custom-action'
         $script:docs | Should -Match 'vi_path'
         $script:docs | Should -Match 'revision-catalog\.json'
+        $script:docs | Should -Match 'corpus-index\.json'
+        $script:docs | Should -Match 'downstream-processing-manifest\.json'
+        $script:docs | Should -Match 'VIP_Post-Install Custom Action\.vi'
+        $script:docs | Should -Match 'VIP_Pre-Install Custom Action\.vi'
         $script:docs | Should -Match 'public-comment-path'
         $script:docs | Should -Match 'public-step-summary-path'
         $script:docs | Should -Match 'public-run-path'
         $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.1\.0'
         $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/manual-vi-exploration\.yml@v1\.3\.7'
+        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.3\.8'
         $script:docs | Should -Match 'index\.md'
         $script:docs | Should -Match 'index\.html'
         $script:docs | Should -Match 'manual-vi-exploration-bundle\.zip'

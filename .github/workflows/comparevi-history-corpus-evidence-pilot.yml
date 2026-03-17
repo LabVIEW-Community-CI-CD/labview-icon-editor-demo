@@ -1,0 +1,254 @@
+name: CompareVI History Corpus Evidence Pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Repository ref to inspect for the fixed seed targets
+        required: false
+        default: develop
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  comparevi-history-corpus-evidence-pilot:
+    runs-on: ubuntu-latest
+    env:
+      PLATFORM_REF: v1.3.8
+      COMPAREVI_NI_LINUX_IMAGE: nationalinstruments/labview:2026q1-linux
+      PILOT_RESULTS_ROOT: tests/results/ref-compare/history-exploration/corpus-pilot
+    steps:
+      - name: Checkout consumer repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+          path: consumer
+
+      - name: Checkout comparevi-history platform repo
+        uses: actions/checkout@v5
+        with:
+          repository: LabVIEW-Community-CI-CD/comparevi-history
+          ref: ${{ env.PLATFORM_REF }}
+          fetch-depth: 1
+          path: platform
+
+      - name: Resolve checked-out consumer SHA
+        id: consumer_sha
+        shell: pwsh
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          $consumerRoot = Join-Path $env:GITHUB_WORKSPACE 'consumer'
+          $sha = (& git -C $consumerRoot rev-parse HEAD).Trim()
+          "consumer_sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Pre-pull NI Linux image
+        shell: bash
+        run: docker pull "$COMPAREVI_NI_LINUX_IMAGE"
+
+      - name: Run corpus evidence pilot
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+
+          $consumerRoot = Join-Path $env:GITHUB_WORKSPACE 'consumer'
+          $platformRoot = Join-Path $env:GITHUB_WORKSPACE 'platform'
+          $pilotRoot = Join-Path $consumerRoot $env:PILOT_RESULTS_ROOT
+          $corpusRoot = Join-Path $pilotRoot 'corpus'
+          New-Item -ItemType Directory -Path $pilotRoot -Force | Out-Null
+          New-Item -ItemType Directory -Path $corpusRoot -Force | Out-Null
+
+          $seedTargets = @(
+            [ordered]@{
+              id = 'vip-post-install-custom-action'
+              path = 'Tooling/deployment/VIP_Post-Install Custom Action.vi'
+            },
+            [ordered]@{
+              id = 'vip-pre-install-custom-action'
+              path = 'Tooling/deployment/VIP_Pre-Install Custom Action.vi'
+            }
+          )
+
+          $sharedEvidencePaths = New-Object System.Collections.Generic.List[string]
+          $evidenceGraphPaths = New-Object System.Collections.Generic.List[string]
+          $targetReceipts = New-Object System.Collections.Generic.List[object]
+
+          foreach ($target in $seedTargets) {
+            $targetRoot = Join-Path $pilotRoot $target.id
+            New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
+
+            & "$platformRoot/scripts/Write-CompareVIHistoryRevisionCatalog.ps1" `
+              -RepositoryRoot $consumerRoot `
+              -TargetPath $target.path `
+              -SelectedRef '${{ steps.consumer_sha.outputs.consumer_sha }}' `
+              -ConsumerRepository $env:GITHUB_REPOSITORY `
+              -ConsumerRef '${{ inputs.ref }}' `
+              -ResultsDir $targetRoot `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            $catalogPath = Join-Path $targetRoot 'revision-catalog.json'
+            $chunkPlanPath = Join-Path $targetRoot 'chunk-plan.json'
+            $explorationRunPath = Join-Path $targetRoot 'exploration-run.json'
+            $evidenceGraphPath = Join-Path $targetRoot 'evidence-graph.json'
+            $sharedEvidencePath = Join-Path $targetRoot 'shared-evidence.json'
+            $indexMdPath = Join-Path $targetRoot 'index.md'
+            $indexHtmlPath = Join-Path $targetRoot 'index.html'
+            $timelineMdPath = Join-Path $targetRoot 'timeline.md'
+            $timelineHtmlPath = Join-Path $targetRoot 'timeline.html'
+            $bundlePath = Join-Path $targetRoot 'manual-vi-exploration-bundle.zip'
+
+            & "$platformRoot/scripts/Write-CompareVIHistoryChunkPlan.ps1" `
+              -RevisionCatalogPath $catalogPath `
+              -ResultsDir $targetRoot `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            & "$platformRoot/scripts/Invoke-CompareVIHistoryChunkExecution.ps1" `
+              -ConsumerRepositoryRoot $consumerRoot `
+              -ChunkPlanPath $chunkPlanPath `
+              -ResultsDir $targetRoot `
+              -Mode 'full' `
+              -NoisePolicy 'include' `
+              -GitHubToken $env:GITHUB_TOKEN `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            & "$platformRoot/scripts/Write-CompareVIHistoryExplorationRun.ps1" `
+              -RevisionCatalogPath $catalogPath `
+              -ChunkPlanPath $chunkPlanPath `
+              -ResultsDir $targetRoot `
+              -Modes 'full' `
+              -NoisePolicy 'include' `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            & "$platformRoot/scripts/Write-CompareVIHistoryExplorationBundle.ps1" `
+              -RevisionCatalogPath $catalogPath `
+              -ChunkPlanPath $chunkPlanPath `
+              -ResultsDir $targetRoot `
+              -ExplorationRunPath $explorationRunPath `
+              -IndexMd $indexMdPath `
+              -IndexHtml $indexHtmlPath `
+              -TimelineMd $timelineMdPath `
+              -TimelineHtml $timelineHtmlPath `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            & "$platformRoot/scripts/Write-CompareVIHistoryExplorationRun.ps1" `
+              -RevisionCatalogPath $catalogPath `
+              -ChunkPlanPath $chunkPlanPath `
+              -ResultsDir $targetRoot `
+              -Modes 'full' `
+              -NoisePolicy 'include' `
+              -IndexMd $indexMdPath `
+              -IndexHtml $indexHtmlPath `
+              -TimelineMd $timelineMdPath `
+              -TimelineHtml $timelineHtmlPath `
+              -BundlePath $bundlePath `
+              -BundleStatus 'succeeded' `
+              -BundleReason 'bundle-written' `
+              -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+            foreach ($requiredPath in @(
+              $catalogPath,
+              $chunkPlanPath,
+              $explorationRunPath,
+              $evidenceGraphPath,
+              $sharedEvidencePath,
+              $indexMdPath,
+              $indexHtmlPath,
+              $timelineMdPath,
+              $timelineHtmlPath,
+              $bundlePath
+            )) {
+              if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+                throw "Expected corpus pilot artifact was not written: $requiredPath"
+              }
+            }
+
+            $sharedEvidencePaths.Add($sharedEvidencePath) | Out-Null
+            $evidenceGraphPaths.Add($evidenceGraphPath) | Out-Null
+            $targetReceipts.Add([ordered]@{
+              targetId = $target.id
+              targetPath = $target.path
+              resultsRoot = $targetRoot
+              revisionCatalogPath = $catalogPath
+              chunkPlanPath = $chunkPlanPath
+              explorationRunPath = $explorationRunPath
+              evidenceGraphPath = $evidenceGraphPath
+              sharedEvidencePath = $sharedEvidencePath
+              bundlePath = $bundlePath
+            }) | Out-Null
+          }
+
+          & "$platformRoot/scripts/Write-CompareVIHistoryCorpusIndex.ps1" `
+            -SharedEvidencePaths @($sharedEvidencePaths.ToArray()) `
+            -EvidenceGraphPaths @($evidenceGraphPaths.ToArray()) `
+            -OutputDir $corpusRoot `
+            -PageSize 2 `
+            -StepSummaryPath $env:GITHUB_STEP_SUMMARY | Out-Null
+
+          $corpusIndexPath = Join-Path $corpusRoot 'corpus-index.json'
+          $corpusPagesRoot = Join-Path $corpusRoot 'pages'
+          $downstreamManifestPath = Join-Path $corpusRoot 'downstream-processing-manifest.json'
+          foreach ($requiredPath in @($corpusIndexPath, $downstreamManifestPath)) {
+            if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+              throw "Expected corpus artifact was not written: $requiredPath"
+            }
+          }
+          if (-not (Test-Path -LiteralPath $corpusPagesRoot -PathType Container)) {
+            throw "Expected corpus pages directory was not written: $corpusPagesRoot"
+          }
+
+          $corpusIndex = Get-Content -LiteralPath $corpusIndexPath -Raw | ConvertFrom-Json -Depth 100
+          if ([string]$corpusIndex.schema -ne 'comparevi-history/corpus-index@v1') {
+            throw "Unexpected corpus index schema: $($corpusIndex.schema)"
+          }
+          if ([int]$corpusIndex.corpus.targetCount -ne 2) {
+            throw "Expected exactly two corpus targets. Actual: $($corpusIndex.corpus.targetCount)"
+          }
+          if ([int]$corpusIndex.paging.pageCount -ne 1) {
+            throw "Expected a single corpus page for the two-target pilot. Actual: $($corpusIndex.paging.pageCount)"
+          }
+          if ([string]$corpusIndex.paging.continuationMode -ne 'page-ordinal') {
+            throw "Unexpected continuation mode: $($corpusIndex.paging.continuationMode)"
+          }
+          if (-not [bool]$corpusIndex.corpus.complete) {
+            throw "Corpus pilot failed closed with corpus.complete=$($corpusIndex.corpus.complete) and reason '$($corpusIndex.corpus.reason)'."
+          }
+
+          $observedTargetPaths = @($corpusIndex.targets | ForEach-Object { [string]$_.targetPath })
+          foreach ($expectedTargetPath in @(
+            'Tooling/deployment/VIP_Post-Install Custom Action.vi',
+            'Tooling/deployment/VIP_Pre-Install Custom Action.vi'
+          )) {
+            if ($observedTargetPaths -notcontains $expectedTargetPath) {
+              throw "Corpus pilot omitted expected target path '$expectedTargetPath'."
+            }
+          }
+
+          $pilotManifest = [ordered]@{
+            schema = 'labview-icon-editor-demo/corpus-evidence-pilot@v1'
+            generatedAtUtc = (Get-Date).ToUniversalTime().ToString('o')
+            platformRef = $env:PLATFORM_REF
+            consumerRepository = $env:GITHUB_REPOSITORY
+            consumerRef = '${{ inputs.ref }}'
+            consumerSha = '${{ steps.consumer_sha.outputs.consumer_sha }}'
+            seedTargets = @($targetReceipts)
+            corpus = [ordered]@{
+              corpusIndexPath = $corpusIndexPath
+              corpusPagesRoot = $corpusPagesRoot
+              downstreamProcessingManifestPath = $downstreamManifestPath
+            }
+          }
+          $pilotManifest | ConvertTo-Json -Depth 64 | Set-Content -LiteralPath (Join-Path $pilotRoot 'corpus-pilot-manifest.json') -Encoding utf8
+
+      - name: Upload corpus pilot artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: comparevi-history-corpus-evidence-pilot-${{ github.run_id }}
+          path: consumer/${{ env.PILOT_RESULTS_ROOT }}
+          if-no-files-found: error
