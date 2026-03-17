@@ -229,15 +229,15 @@ jobs:
             }
           }
 
-          $pilotManifest = [ordered]@{
+          $pilotManifest = @{
             schema = 'labview-icon-editor-demo/corpus-evidence-pilot@v1'
             generatedAtUtc = (Get-Date).ToUniversalTime().ToString('o')
             platformRef = $env:PLATFORM_REF
             consumerRepository = $env:GITHUB_REPOSITORY
             consumerRef = '${{ inputs.ref }}'
             consumerSha = '${{ steps.consumer_sha.outputs.consumer_sha }}'
-            seedTargets = @($targetReceipts)
-            corpus = [ordered]@{
+            seedTargets = @($targetReceipts.ToArray())
+            corpus = @{
               corpusIndexPath = $corpusIndexPath
               corpusPagesRoot = $corpusPagesRoot
               downstreamProcessingManifestPath = $downstreamManifestPath
