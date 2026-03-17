@@ -9,7 +9,7 @@ review without running that platform directly from untrusted PR events.
   is the standard automatic changed-VI pull-request surface. It stays thin by forwarding the current repository and the
   checked-in `.github/comparevi-history-pr-policy.json` contract into the reusable
   `comparevi-history` execution workflow pinned to the immutable platform commit
-  `f57027804e53af8443b38f018a59865ad83b8fa4`.
+  `d0e92af4f36da76c946a194efe4c2cc79590629d`.
 - [`.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml)
   is the privileged `workflow_run` follow-on publisher. It reads the execution artifact from the completed pull request
   run and creates or updates the sticky PR comment without checking out or executing candidate PR code.
@@ -128,7 +128,7 @@ unchanged and continue to use the checked-in target catalog.
 
 - Consumer workflows in this repository must pin immutable `comparevi-history` refs only.
 - The automatic changed-VI PR wrappers currently pin the immutable platform commit
-  `f57027804e53af8443b38f018a59865ad83b8fa4` until the next released tag includes the new reusable workflows.
+  `d0e92af4f36da76c946a194efe4c2cc79590629d` until the next released tag includes the new reusable workflows.
 - Consumers in this repository must not pin `compare-vi-cli-action` directly.
 - The normal released `comparevi-history` path already resolves its backend from the released
   `compare-vi-cli-action` bundle mapping.

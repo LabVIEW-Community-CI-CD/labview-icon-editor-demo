@@ -15,9 +15,9 @@ permissions:
 jobs:
   comparevi-history-pull-request-diagnostics-publish:
     if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' }}
-    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@f57027804e53af8443b38f018a59865ad83b8fa4
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@d0e92af4f36da76c946a194efe4c2cc79590629d
     with:
       consumer_repository: ${{ github.repository }}
       workflow_run_id: ${{ github.event.workflow_run.id }}
       artifact_name: comparevi-history-pr-diagnostics-${{ github.event.workflow_run.id }}
-      platform_ref: f57027804e53af8443b38f018a59865ad83b8fa4
+      platform_ref: d0e92af4f36da76c946a194efe4c2cc79590629d
