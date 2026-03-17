@@ -1,0 +1,32 @@
+{
+  "schema": "comparevi-history/pr-policy@v2",
+  "discovery": {
+    "selectionMode": "dynamic-paths",
+    "includePaths": [
+      "**/*.vi"
+    ],
+    "excludePaths": [],
+    "maxChangedViCount": 10,
+    "overflowBehavior": "block"
+  },
+  "execution": {
+    "publicModes": [
+      "attributes",
+      "front-panel",
+      "block-diagram"
+    ],
+    "noisePolicy": "include",
+    "history": {
+      "sourceBranchRefStrategy": "pull-request-base",
+      "keepArtifactsOnNoDiff": true
+    }
+  },
+  "reviewerSurface": {
+    "emitCommentBody": true,
+    "emitStepSummary": true,
+    "fullSurface": "artifact-index"
+  },
+  "trust": {
+    "forkBehavior": "hosted-auto"
+  }
+}
