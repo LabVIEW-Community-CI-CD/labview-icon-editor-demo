@@ -1,0 +1,27 @@
+name: CompareVI History Pull Request Diagnostics
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - release/*
+      - feature/*
+      - hotfix/*
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  comparevi-history-pull-request-diagnostics:
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@f57027804e53af8443b38f018a59865ad83b8fa4
+    with:
+      consumer_repository: ${{ github.repository }}
+      pr_policy_path: .github/comparevi-history-pr-policy.json
+      results_dir: tests/results/pr-diagnostics/history
+      platform_ref: f57027804e53af8443b38f018a59865ad83b8fa4

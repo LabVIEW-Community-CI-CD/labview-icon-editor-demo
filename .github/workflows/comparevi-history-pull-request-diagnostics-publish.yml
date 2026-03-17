@@ -1,0 +1,23 @@
+name: CompareVI History Pull Request Diagnostics Publish
+
+on:
+  workflow_run:
+    workflows:
+      - CompareVI History Pull Request Diagnostics
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  comparevi-history-pull-request-diagnostics-publish:
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' }}
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@f57027804e53af8443b38f018a59865ad83b8fa4
+    with:
+      consumer_repository: ${{ github.repository }}
+      workflow_run_id: ${{ github.event.workflow_run.id }}
+      artifact_name: comparevi-history-pr-diagnostics-${{ github.event.workflow_run.id }}
+      platform_ref: f57027804e53af8443b38f018a59865ad83b8fa4

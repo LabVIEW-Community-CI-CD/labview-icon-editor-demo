@@ -5,6 +5,14 @@ review without running that platform directly from untrusted PR events.
 
 ## Workflows
 
+- [`.github/workflows/comparevi-history-pull-request-diagnostics.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics.yml)
+  is the standard automatic changed-VI pull-request surface. It stays thin by forwarding the current repository and the
+  checked-in `.github/comparevi-history-pr-policy.json` contract into the reusable
+  `comparevi-history` execution workflow pinned to the immutable platform commit
+  `f57027804e53af8443b38f018a59865ad83b8fa4`.
+- [`.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml)
+  is the privileged `workflow_run` follow-on publisher. It reads the execution artifact from the completed pull request
+  run and creates or updates the sticky PR comment without checking out or executing candidate PR code.
 - [`.github/workflows/comparevi-history-manual-vi-exploration.yml`](../.github/workflows/comparevi-history-manual-vi-exploration.yml)
   is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
@@ -22,8 +30,40 @@ review without running that platform directly from untrusted PR events.
 - [`.github/workflows/comparevi-history-comment-gated.yml`](../.github/workflows/comparevi-history-comment-gated.yml)
   is a maintainer-only slash-command workflow that runs when a trusted maintainer comments
   `/comparevi-history <target-id> [--modes attributes,front-panel,block-diagram]` on a pull request.
+- [`.github/comparevi-history-pr-policy.json`](../.github/comparevi-history-pr-policy.json) is the repo-owned
+  automatic PR policy contract. It selects dynamic raw `.vi` paths, blocks above `10` changed VIs, keeps the explicit
+  public mode bundle `attributes`, `front-panel`, and `block-diagram`, and enables the split hosted execution plus
+  sticky-comment publisher path for same-repo and fork pull requests.
 - [`.github/comparevi-history-targets.json`](../.github/comparevi-history-targets.json) is the repo-owned target
   catalog that declares which VI history targets this consumer exposes.
+
+The automatic changed-VI pull-request surface:
+
+- is additive and leaves the manual PR diagnostics, comment-gated diagnostics, manual exploration, corpus pilot, and
+  checked-in target catalog unchanged
+- triggers on `pull_request` for `main`, `develop`, `release/*`, `feature/*`, and `hotfix/*`
+- discovers changed `.vi` files through `comparevi-history/changed-vi-discovery@v2` using the trusted base-branch
+  policy checkout instead of a PR-local script
+- aggregates execution state through `comparevi-history/pr-run@v2`
+- does not require the touched VI to exist in `.github/comparevi-history-targets.json`
+- executes full unsuppressed history evidence for each selected changed VI
+- fails closed when more than `10` changed `.vi` files are present in one pull request
+- writes one aggregate execution bundle with:
+  - `changed-vi-discovery.json`
+  - `pr-run.json`
+  - `pr-comment.md`
+  - `pr-step-summary.md`
+  - `index.md`
+  - `index.html`
+  - per-target `request.json`, `public-run.json`, `shared-evidence.json`, `history-summary.json`, `history-report.md`,
+    and `history-report.html`
+- uses the execution artifact index as the primary full reviewer surface; the PR comment and workflow summary are
+  bounded entrypoints only
+- auto-runs for same-repo pull requests with a read-only execution token
+- auto-runs for fork pull requests through the same read-only execution path and then publishes the sticky reviewer
+  comment from the separate privileged `workflow_run` publisher
+- keeps the consumer wrapper thin by delegating changed-file discovery, aggregation, comment preparation, and sticky
+  comment publication to `comparevi-history`
 
 The manual exploration workflow:
 
@@ -81,12 +121,14 @@ The PR diagnostics workflows:
 - append the action-owned `public-step-summary-path`
 - publish the action-owned `public-comment-path` for comment-gated reviewer flows
 
-The manual exploration path is additive. Existing target-id PR diagnostics remain unchanged and continue to use the
-checked-in target catalog.
+The automatic changed-VI PR path and the manual exploration path are additive. Existing target-id PR diagnostics remain
+unchanged and continue to use the checked-in target catalog.
 
 ## Release Contract
 
-- Consumer workflows in this repository must pin released `comparevi-history` refs only.
+- Consumer workflows in this repository must pin immutable `comparevi-history` refs only.
+- The automatic changed-VI PR wrappers currently pin the immutable platform commit
+  `f57027804e53af8443b38f018a59865ad83b8fa4` until the next released tag includes the new reusable workflows.
 - Consumers in this repository must not pin `compare-vi-cli-action` directly.
 - The normal released `comparevi-history` path already resolves its backend from the released
   `compare-vi-cli-action` bundle mapping.
@@ -105,6 +147,9 @@ checked-in target catalog.
   upstream unless they intentionally diverge on diagnostics policy.
 - The workflows are repo-local by design: they query the pull request from the current repository, then check out the
   PR head repo and SHA exactly as reported by the GitHub API.
+- The automatic changed-VI PR publisher does not check out the PR head again; it reads the execution artifact from the
+  completed `pull_request` run through the `workflow_run` event and updates the sticky comment from those prepared
+  files only.
 
 ## Target Catalog
 
@@ -116,12 +161,14 @@ checked-in target catalog.
 ## Recommended Usage
 
 1. Start with the manual workflow when you want a low-risk maintainer-controlled diagnostics path.
-2. Use target id `vip-post-install-custom-action` while validating hosted-runner and trust behavior.
-3. Use the comment-gated workflow once maintainers are comfortable triggering diagnostics from PR comments on the
+2. Use the automatic changed-VI PR workflows as the standard reviewer surface when you want every touched `.vi` in a
+   pull request to receive CompareVI History automatically.
+3. Use target id `vip-post-install-custom-action` while validating the legacy catalog-based hosted-runner path.
+4. Use the comment-gated workflow once maintainers are comfortable triggering diagnostics from PR comments on the
    hosted runner under maintainer-only command gating.
-4. Keep the explicit public mode bundle `attributes,front-panel,block-diagram` unless there is a documented reason to
+5. Keep the explicit public mode bundle `attributes,front-panel,block-diagram` unless there is a documented reason to
    narrow it further.
-5. Use the manual VI exploration workflow when you want the full available revision catalog for a specific repo-relative
+6. Use the manual VI exploration workflow when you want the full available revision catalog for a specific repo-relative
    `.vi` path rather than the curated target-id diagnostics contract.
 
 ## See Also
