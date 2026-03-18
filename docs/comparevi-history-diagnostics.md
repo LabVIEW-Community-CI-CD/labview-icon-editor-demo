@@ -38,7 +38,9 @@ review without running that platform directly from untrusted PR events.
 - [`.github/comparevi-history-pr-policy.json`](../.github/comparevi-history-pr-policy.json) is the repo-owned
   automatic PR policy contract. It selects dynamic raw `.vi` paths, blocks above `10` changed VIs, keeps the explicit
   public mode bundle `attributes`, `front-panel`, and `block-diagram`, and enables the split hosted execution plus
-  sticky-comment publisher path for same-repo and fork pull requests.
+  sticky-comment publisher path for same-repo and fork pull requests. The contract excludes
+  `Tooling/comparevi-history-canary/variants/**/*.vi` so the canary support fixtures do not become reviewer-facing PR
+  targets.
 - [`.github/comparevi-history-agent-canary.json`](../.github/comparevi-history-agent-canary.json) is the repo-owned
   canary policy contract (`comparevi-history/agent-canary-policy@v1`). It binds the dedicated canary VI
   `Tooling/comparevi-history-canary/CanaryProbe.vi`,
@@ -60,6 +62,8 @@ The automatic changed-VI pull-request surface:
   policy checkout instead of a PR-local script
 - aggregates execution state through `comparevi-history/pr-run@v2`
 - does not require the touched VI to exist in `.github/comparevi-history-targets.json`
+- excludes `Tooling/comparevi-history-canary/variants/**/*.vi` so support fixtures do not dilute automatic reviewer
+  coverage
 - executes full unsuppressed history evidence for each selected changed VI
 - fails closed when more than `10` changed `.vi` files are present in one pull request
 - writes one aggregate execution bundle with:
