@@ -1,0 +1,24 @@
+name: CompareVI History Agent Canary Evaluate
+
+on:
+  workflow_run:
+    workflows:
+      - CompareVI History Pull Request Diagnostics Publish
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  comparevi-history-agent-canary-evaluate:
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.10
+    with:
+      consumer_repository: ${{ github.repository }}
+      workflow_run_id: ${{ github.event.workflow_run.id }}
+      artifact_name: comparevi-history-pr-diagnostics-publish-${{ github.event.workflow_run.id }}
+      canary_policy_path: .github/comparevi-history-agent-canary.json
+      platform_ref: v1.3.10

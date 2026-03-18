@@ -8,23 +8,35 @@ Describe 'CompareVI History workflow contracts' {
         $repoRoot = (Resolve-Path -Path (Join-Path $PSScriptRoot '..\..')).Path
         $script:automaticPrWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-pull-request-diagnostics.yml'
         $script:automaticPrPublishWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml'
+        $script:agentCanaryWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-agent-canary-evaluate.yml'
         $script:manualWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-manual-pr-diagnostics.yml'
         $script:manualExplorationWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-manual-vi-exploration.yml'
         $script:corpusPilotWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-corpus-evidence-pilot.yml'
         $script:commentWorkflowPath = Join-Path $repoRoot '.github/workflows/comparevi-history-comment-gated.yml'
         $script:automaticPrPolicyPath = Join-Path $repoRoot '.github/comparevi-history-pr-policy.json'
+        $script:agentCanaryPolicyPath = Join-Path $repoRoot '.github/comparevi-history-agent-canary.json'
         $script:targetCatalogPath = Join-Path $repoRoot '.github/comparevi-history-targets.json'
+        $script:agentCanaryToggleScriptPath = Join-Path $repoRoot 'Tooling/Set-CompareVIHistoryAgentCanaryVariant.ps1'
+        $script:agentCanaryProbePath = Join-Path $repoRoot 'Tooling/comparevi-history-canary/CanaryProbe.vi'
+        $script:agentCanaryVariantAPath = Join-Path $repoRoot 'Tooling/comparevi-history-canary/variants/CanaryProbe-A.vi'
+        $script:agentCanaryVariantBPath = Join-Path $repoRoot 'Tooling/comparevi-history-canary/variants/CanaryProbe-B.vi'
         $script:docsPath = Join-Path $repoRoot 'docs/comparevi-history-diagnostics.md'
 
         foreach ($path in @(
             $script:automaticPrWorkflowPath,
             $script:automaticPrPublishWorkflowPath,
+            $script:agentCanaryWorkflowPath,
             $script:manualWorkflowPath,
             $script:manualExplorationWorkflowPath,
             $script:corpusPilotWorkflowPath,
             $script:commentWorkflowPath,
             $script:automaticPrPolicyPath,
+            $script:agentCanaryPolicyPath,
             $script:targetCatalogPath,
+            $script:agentCanaryToggleScriptPath,
+            $script:agentCanaryProbePath,
+            $script:agentCanaryVariantAPath,
+            $script:agentCanaryVariantBPath,
             $script:docsPath
         )) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -34,11 +46,13 @@ Describe 'CompareVI History workflow contracts' {
 
         $script:automaticPrWorkflow = Get-Content -LiteralPath $script:automaticPrWorkflowPath -Raw
         $script:automaticPrPublishWorkflow = Get-Content -LiteralPath $script:automaticPrPublishWorkflowPath -Raw
+        $script:agentCanaryWorkflow = Get-Content -LiteralPath $script:agentCanaryWorkflowPath -Raw
         $script:manualWorkflow = Get-Content -LiteralPath $script:manualWorkflowPath -Raw
         $script:manualExplorationWorkflow = Get-Content -LiteralPath $script:manualExplorationWorkflowPath -Raw
         $script:corpusPilotWorkflow = Get-Content -LiteralPath $script:corpusPilotWorkflowPath -Raw
         $script:commentWorkflow = Get-Content -LiteralPath $script:commentWorkflowPath -Raw
         $script:automaticPrPolicy = Get-Content -LiteralPath $script:automaticPrPolicyPath -Raw
+        $script:agentCanaryPolicy = Get-Content -LiteralPath $script:agentCanaryPolicyPath -Raw
         $script:targetCatalog = Get-Content -LiteralPath $script:targetCatalogPath -Raw
         $script:docs = Get-Content -LiteralPath $script:docsPath -Raw
     }
@@ -59,11 +73,11 @@ Describe 'CompareVI History workflow contracts' {
         $script:automaticPrWorkflow | Should -Match '(?m)^\s*pull_request:\s*$'
         $script:automaticPrWorkflow | Should -Match 'branches:\s*(?:\r?\n\s*-\s+main)(?:\r?\n\s*-\s+develop)(?:\r?\n\s*-\s+release/\*)(?:\r?\n\s*-\s+feature/\*)(?:\r?\n\s*-\s+hotfix/\*)'
         $script:automaticPrWorkflow | Should -Match 'types:\s*(?:\r?\n\s*-\s+opened)(?:\r?\n\s*-\s+synchronize)(?:\r?\n\s*-\s+reopened)(?:\r?\n\s*-\s+ready_for_review)'
-        $script:automaticPrWorkflow | Should -Match 'uses:\s+LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-auto\.yml@v1\.3\.9'
+        $script:automaticPrWorkflow | Should -Match 'uses:\s+LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-auto\.yml@v1\.3\.10'
         $script:automaticPrWorkflow | Should -Match 'consumer_repository:\s+\$\{\{ github\.repository \}\}'
         $script:automaticPrWorkflow | Should -Match 'pr_policy_path:\s+\.github/comparevi-history-pr-policy\.json'
         $script:automaticPrWorkflow | Should -Match 'results_dir:\s+tests/results/pr-diagnostics/history'
-        $script:automaticPrWorkflow | Should -Match 'platform_ref:\s+v1\.3\.9'
+        $script:automaticPrWorkflow | Should -Match 'platform_ref:\s+v1\.3\.10'
         $script:automaticPrWorkflow | Should -Not -Match 'actions/checkout@'
         $script:automaticPrWorkflow | Should -Not -Match 'invoke_script_path:'
         $script:automaticPrWorkflow | Should -Not -Match 'target_spec_path:'
@@ -75,12 +89,28 @@ Describe 'CompareVI History workflow contracts' {
         $script:automaticPrPublishWorkflow | Should -Match 'CompareVI History Pull Request Diagnostics'
         $script:automaticPrPublishWorkflow | Should -Match 'pull-requests:\s+write'
         $script:automaticPrPublishWorkflow | Should -Match 'if:\s+\$\{\{\s*github\.event\.workflow_run\.event == ''pull_request'''
-        $script:automaticPrPublishWorkflow | Should -Match 'uses:\s+LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-publish\.yml@v1\.3\.9'
+        $script:automaticPrPublishWorkflow | Should -Match 'uses:\s+LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-publish\.yml@v1\.3\.10'
         $script:automaticPrPublishWorkflow | Should -Match 'consumer_repository:\s+\$\{\{ github\.repository \}\}'
         $script:automaticPrPublishWorkflow | Should -Match 'workflow_run_id:\s+\$\{\{ github\.event\.workflow_run\.id \}\}'
         $script:automaticPrPublishWorkflow | Should -Match 'artifact_name:\s+comparevi-history-pr-diagnostics-\$\{\{ github\.event\.workflow_run\.id \}\}'
-        $script:automaticPrPublishWorkflow | Should -Match 'platform_ref:\s+v1\.3\.9'
+        $script:automaticPrPublishWorkflow | Should -Match 'platform_ref:\s+v1\.3\.10'
         $script:automaticPrPublishWorkflow | Should -Not -Match 'actions/checkout@'
+    }
+
+    It 'adds a thin agent-canary evaluation wrapper pinned to the same immutable comparevi-history ref' {
+        $script:agentCanaryWorkflow | Should -Match 'name:\s+CompareVI History Agent Canary Evaluate'
+        $script:agentCanaryWorkflow | Should -Match '(?m)^\s*workflow_run:\s*$'
+        $script:agentCanaryWorkflow | Should -Match 'CompareVI History Pull Request Diagnostics Publish'
+        $script:agentCanaryWorkflow | Should -Match 'actions:\s+read'
+        $script:agentCanaryWorkflow | Should -Match 'contents:\s+read'
+        $script:agentCanaryWorkflow | Should -Match 'pull-requests:\s+read'
+        $script:agentCanaryWorkflow | Should -Match 'uses:\s+LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-canary-evaluate\.yml@v1\.3\.10'
+        $script:agentCanaryWorkflow | Should -Match 'consumer_repository:\s+\$\{\{ github\.repository \}\}'
+        $script:agentCanaryWorkflow | Should -Match 'workflow_run_id:\s+\$\{\{ github\.event\.workflow_run\.id \}\}'
+        $script:agentCanaryWorkflow | Should -Match 'artifact_name:\s+comparevi-history-pr-diagnostics-publish-\$\{\{ github\.event\.workflow_run\.id \}\}'
+        $script:agentCanaryWorkflow | Should -Match 'canary_policy_path:\s+\.github/comparevi-history-agent-canary\.json'
+        $script:agentCanaryWorkflow | Should -Match 'platform_ref:\s+v1\.3\.10'
+        $script:agentCanaryWorkflow | Should -Not -Match 'actions/checkout@'
     }
 
     It 'checks in a v2 automatic PR policy that selects dynamic raw VI paths' {
@@ -98,6 +128,27 @@ Describe 'CompareVI History workflow contracts' {
         $script:automaticPrPolicy | Should -Match '"emitStepSummary"\s*:\s*true'
         $script:automaticPrPolicy | Should -Match '"fullSurface"\s*:\s*"artifact-index"'
         $script:automaticPrPolicy | Should -Match '"forkBehavior"\s*:\s*"hosted-auto"'
+    }
+
+    It 'checks in an agent-canary policy bound to the dedicated canary VI' {
+        $script:agentCanaryPolicy | Should -Match '"schema"\s*:\s*"comparevi-history/agent-canary-policy@v1"'
+        $script:agentCanaryPolicy | Should -Match '"branchPrefix"\s*:\s*"agent-canary/"'
+        $script:agentCanaryPolicy | Should -Match '"requiredLabels"\s*:\s*\[\s*"agent-canary"\s*\]'
+        $script:agentCanaryPolicy | Should -Match '"canonicalPath"\s*:\s*"Tooling/comparevi-history-canary/CanaryProbe\.vi"'
+        $script:agentCanaryPolicy | Should -Match '"expectedChangedViCount"\s*:\s*1'
+        $script:agentCanaryPolicy | Should -Match '"expectedSelectedTargetCount"\s*:\s*1'
+        $script:agentCanaryPolicy | Should -Match '"expectedNoisePolicy"\s*:\s*"include"'
+        $script:agentCanaryPolicy | Should -Match '"expectedFullSurface"\s*:\s*"artifact-index"'
+        $script:agentCanaryPolicy | Should -Match '"requiredStatus"\s*:\s*"succeeded"'
+        $script:agentCanaryPolicy | Should -Match '"mergePolicy"\s*:\s*"manual-only"'
+        $script:agentCanaryPolicy | Should -Match '"prMode"\s*:\s*"draft"'
+    }
+
+    It 'checks in the dedicated canary fixture assets and toggle script' {
+        $script:agentCanaryProbePath | Should -Exist
+        $script:agentCanaryVariantAPath | Should -Exist
+        $script:agentCanaryVariantBPath | Should -Exist
+        $script:agentCanaryToggleScriptPath | Should -Exist
     }
 
     It 'keeps the manual workflow on target ids and action-owned summaries' {
@@ -192,12 +243,21 @@ Describe 'CompareVI History workflow contracts' {
     It 'documents the target catalog and action-owned public outputs' {
         $script:docs | Should -Match '\.github/workflows/comparevi-history-pull-request-diagnostics\.yml'
         $script:docs | Should -Match '\.github/workflows/comparevi-history-pull-request-diagnostics-publish\.yml'
+        $script:docs | Should -Match '\.github/workflows/comparevi-history-agent-canary-evaluate\.yml'
         $script:docs | Should -Match '\.github/comparevi-history-pr-policy\.json'
+        $script:docs | Should -Match '\.github/comparevi-history-agent-canary\.json'
         $script:docs | Should -Match '\.github/comparevi-history-targets\.json'
+        $script:docs | Should -Match 'Tooling/comparevi-history-canary/CanaryProbe\.vi'
+        $script:docs | Should -Match 'Tooling/Set-CompareVIHistoryAgentCanaryVariant\.ps1'
+        $script:docs | Should -Match 'agent-canary/'
+        $script:docs | Should -Match 'long-lived draft PR'
+        $script:docs | Should -Match 'pull-requests:\s*read'
         $script:docs | Should -Match '\.github/workflows/comparevi-history-manual-vi-exploration\.yml'
         $script:docs | Should -Match '\.github/workflows/comparevi-history-corpus-evidence-pilot\.yml'
         $script:docs | Should -Match 'comparevi-history/changed-vi-discovery@v2'
         $script:docs | Should -Match 'comparevi-history/pr-run@v2'
+        $script:docs | Should -Match 'comparevi-history/agent-canary-policy@v1'
+        $script:docs | Should -Match 'comparevi-history/agent-canary-evaluation@v1'
         $script:docs | Should -Match 'workflow_run'
         $script:docs | Should -Match 'sticky PR comment'
         $script:docs | Should -Match 'same-repo pull requests'
@@ -217,10 +277,11 @@ Describe 'CompareVI History workflow contracts' {
         $script:docs | Should -Match 'public-step-summary-path'
         $script:docs | Should -Match 'public-run-path'
         $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.1\.0'
-        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-auto\.yml@v1\.3\.9'
-        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-publish\.yml@v1\.3\.9'
+        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-auto\.yml@v1\.3\.10'
+        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-publish\.yml@v1\.3\.10'
+        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/pull-request-diagnostics-canary-evaluate\.yml@v1\.3\.10'
         $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history/\.github/workflows/manual-vi-exploration\.yml@v1\.3\.7'
-        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.3\.9'
+        $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.3\.10'
         $script:docs | Should -Match 'LabVIEW-Community-CI-CD/comparevi-history@v1\.3\.8'
         $script:docs | Should -Match 'index\.md'
         $script:docs | Should -Match 'index\.html'
