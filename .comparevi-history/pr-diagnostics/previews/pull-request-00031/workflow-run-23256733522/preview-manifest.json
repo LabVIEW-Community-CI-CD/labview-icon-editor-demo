@@ -1,0 +1,230 @@
+{
+  "schema": "comparevi-history/pr-comment-preview-publication@v1",
+  "generatedAtUtc": "2026-03-18T17:00:26.8771477Z",
+  "repository": "LabVIEW-Community-CI-CD/labview-icon-editor-demo",
+  "branch": "comparevi-history-pr-previews",
+  "root": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522",
+  "previewCards": [
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "comparison": {
+        "index": 1,
+        "baseRef": "3bef79a1048e19aefdd788f7acbed245a9827450",
+        "headRef": "1308b61484ae543f528f6ba24771f59568923ce1",
+        "baseShortRef": "3bef79a1048e",
+        "headShortRef": "1308b61484ae",
+        "baseSubject": "Merge pull request #29 from svelderrainruiz/issue/28-agent-canary-proof-lane",
+        "headSubject": "Adding a test change"
+      },
+      "changeDetails": {
+        "label": "Change details",
+        "sourceMode": "attributes",
+        "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html",
+        "includedCategories": [
+          "Block Diagram Functional",
+          "Block Diagram Cosmetic",
+          "VI Attribute"
+        ],
+        "groupCount": 2,
+        "omittedGroupCount": 0,
+        "sectionCount": 7,
+        "detailCount": 26,
+        "groups": [
+          {
+            "heading": "Block diagram moves",
+            "sectionCount": 6,
+            "detailCount": 24,
+            "sampleDetails": [
+              "Property Node - moved : changed from \" (-35,102) \" to \" (-55,77) \"",
+              "Tunnel - moved : changed from \" (141,124) \" to \" (141,124) \"",
+              "Case Selector - moved : changed from \" (141,143) \" to \" (141,143) \""
+            ],
+            "omittedDetailCount": 21,
+            "primaryReportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-001-block-diagram-objects",
+            "sectionLinks": [
+              {
+                "sectionOrdinal": 1,
+                "label": "section 1",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-001-block-diagram-objects"
+              },
+              {
+                "sectionOrdinal": 3,
+                "label": "section 3",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-003-block-diagram-objects"
+              },
+              {
+                "sectionOrdinal": 4,
+                "label": "section 4",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-004-block-diagram-objects"
+              },
+              {
+                "sectionOrdinal": 5,
+                "label": "section 5",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-005-block-diagram-objects"
+              },
+              {
+                "sectionOrdinal": 6,
+                "label": "section 6",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-006-block-diagram-objects"
+              },
+              {
+                "sectionOrdinal": 7,
+                "label": "section 7",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-007-block-diagram-objects"
+              }
+            ]
+          },
+          {
+            "heading": "Block diagram resizing",
+            "sectionCount": 1,
+            "detailCount": 2,
+            "sampleDetails": [
+              "Case Structure - resized : changed from \" 702*298 \" to \" 702*370 \"",
+              "- resized : changed from \" 690*23 \" to \" 690*25 \""
+            ],
+            "omittedDetailCount": 0,
+            "primaryReportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-002-block-diagram-objects",
+            "sectionLinks": [
+              {
+                "sectionOrdinal": 2,
+                "label": "section 2",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.reviewer-anchors.html#comparevi-change-002-block-diagram-objects"
+              }
+            ]
+          }
+        ]
+      },
+      "surfaces": [
+        {
+          "surfaceKind": "front-panel",
+          "surfaceLabel": "Front panel",
+          "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.html",
+          "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/base.png",
+          "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/base.png",
+          "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/head.png",
+          "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/head.png"
+        },
+        {
+          "surfaceKind": "block-diagram",
+          "surfaceLabel": "Block diagram",
+          "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/block-diagram/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.html",
+          "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/02-block-diagram/base.png",
+          "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/02-block-diagram/base.png",
+          "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/02-block-diagram/head.png",
+          "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/02-block-diagram/head.png"
+        }
+      ]
+    },
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "comparison": {
+        "index": 2,
+        "baseRef": "d17fc26531f64377e02e8effc5a8f20d31c5a11b",
+        "headRef": "47ae02305c3d2934a4d4450f2973dd0a1574cefc",
+        "baseShortRef": "d17fc26531f6",
+        "headShortRef": "47ae02305c3d",
+        "baseSubject": "Initial creation of manual test procedures (#475)",
+        "headSubject": "Feature/456 make labview 2020 the minimum supported version for the open source icon editor (#485)"
+      },
+      "changeDetails": {
+        "label": "Change details",
+        "sourceMode": "attributes",
+        "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.reviewer-anchors.html",
+        "includedCategories": [
+          "Block Diagram Functional",
+          "Block Diagram Cosmetic",
+          "VI Attribute"
+        ],
+        "groupCount": 1,
+        "omittedGroupCount": 0,
+        "sectionCount": 1,
+        "detailCount": 1,
+        "groups": [
+          {
+            "heading": "VI version changes",
+            "sectionCount": 1,
+            "detailCount": 1,
+            "sampleDetails": [
+              "VI Version : changed from \"21.0\" to \"20.0\""
+            ],
+            "omittedDetailCount": 0,
+            "primaryReportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.reviewer-anchors.html#comparevi-change-001-vi-attribute-miscellaneous",
+            "sectionLinks": [
+              {
+                "sectionOrdinal": 1,
+                "label": "section 1",
+                "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/attributes/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.reviewer-anchors.html#comparevi-change-001-vi-attribute-miscellaneous"
+              }
+            ]
+          }
+        ]
+      },
+      "surfaces": [
+        {
+          "surfaceKind": "front-panel",
+          "surfaceLabel": "Front panel",
+          "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.html",
+          "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/base.png",
+          "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/base.png",
+          "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/head.png",
+          "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/head.png"
+        },
+        {
+          "surfaceKind": "block-diagram",
+          "surfaceLabel": "Block diagram",
+          "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/block-diagram/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.html",
+          "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/02-block-diagram/base.png",
+          "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/02-block-diagram/base.png",
+          "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/02-block-diagram/head.png",
+          "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/02-block-diagram/head.png"
+        }
+      ]
+    }
+  ],
+  "previewPairs": [
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "mode": "front-panel",
+      "label": "Front panel",
+      "sectionKind": "overview",
+      "comparison": {
+        "index": 1,
+        "baseRef": "3bef79a1048e19aefdd788f7acbed245a9827450",
+        "headRef": "1308b61484ae543f528f6ba24771f59568923ce1",
+        "baseShortRef": "3bef79a1048e",
+        "headShortRef": "1308b61484ae",
+        "baseSubject": "Merge pull request #29 from svelderrainruiz/issue/28-agent-canary-proof-lane",
+        "headSubject": "Adding a test change"
+      },
+      "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.html",
+      "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/base.png",
+      "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/base.png",
+      "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/head.png",
+      "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/001-history-pair-01/01-front-panel/head.png"
+    },
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "mode": "front-panel",
+      "label": "Front panel",
+      "sectionKind": "overview",
+      "comparison": {
+        "index": 2,
+        "baseRef": "d17fc26531f64377e02e8effc5a8f20d31c5a11b",
+        "headRef": "47ae02305c3d2934a4d4450f2973dd0a1574cefc",
+        "baseShortRef": "d17fc26531f6",
+        "headShortRef": "47ae02305c3d",
+        "baseSubject": "Initial creation of manual test procedures (#475)",
+        "headSubject": "Feature/456 make labview 2020 the minimum supported version for the open source icon editor (#485)"
+      },
+      "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.html",
+      "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/base.png",
+      "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/base.png",
+      "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/head.png",
+      "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23256733522/002-history-pair-02/01-front-panel/head.png"
+    }
+  ]
+}
