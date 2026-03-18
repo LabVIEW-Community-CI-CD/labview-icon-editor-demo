@@ -1,0 +1,51 @@
+{
+  "schema": "comparevi-history/pr-comment-preview-publication@v1",
+  "generatedAtUtc": "2026-03-18T12:47:26.2471297Z",
+  "repository": "LabVIEW-Community-CI-CD/labview-icon-editor-demo",
+  "branch": "comparevi-history-pr-previews",
+  "root": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393",
+  "previewPairs": [
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "mode": "front-panel",
+      "label": "Front Panel Overview",
+      "sectionKind": "overview",
+      "comparison": {
+        "index": 1,
+        "baseRef": "3bef79a1048e19aefdd788f7acbed245a9827450",
+        "headRef": "1308b61484ae543f528f6ba24771f59568923ce1",
+        "baseShortRef": "3bef79a1048e",
+        "headShortRef": "1308b61484ae",
+        "baseSubject": "Merge pull request #29 from svelderrainruiz/issue/28-agent-canary-proof-lane",
+        "headSubject": "Adding a test change"
+      },
+      "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-001-artifacts/compare-report.html",
+      "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/001-front-panel-overview/base.png",
+      "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/001-front-panel-overview/base.png",
+      "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/001-front-panel-overview/head.png",
+      "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/001-front-panel-overview/head.png"
+    },
+    {
+      "targetId": "dynamic-vip-pre-install-custom-action-3cfcfa1e9478",
+      "targetPath": "Tooling/deployment/VIP_Pre-Install Custom Action.vi",
+      "mode": "front-panel",
+      "label": "Front Panel Overview",
+      "sectionKind": "overview",
+      "comparison": {
+        "index": 2,
+        "baseRef": "d17fc26531f64377e02e8effc5a8f20d31c5a11b",
+        "headRef": "47ae02305c3d2934a4d4450f2973dd0a1574cefc",
+        "baseShortRef": "d17fc26531f6",
+        "headShortRef": "47ae02305c3d",
+        "baseSubject": "Initial creation of manual test procedures (#475)",
+        "headSubject": "Feature/456 make labview 2020 the minimum supported version for the open source icon editor (#485)"
+      },
+      "reportHtmlRelativePath": "targets/001-dynamic-vip-pre-install-custom-action-3cfcfa1e9478/history/front-panel/VIP_Pre-Install_Custom_Action.vi-002-artifacts/compare-report.html",
+      "baseImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/002-front-panel-overview/base.png",
+      "baseImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/002-front-panel-overview/base.png",
+      "headImagePath": ".comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/002-front-panel-overview/head.png",
+      "headImageUrl": "https://raw.githubusercontent.com/LabVIEW-Community-CI-CD/labview-icon-editor-demo/comparevi-history-pr-previews/.comparevi-history/pr-diagnostics/previews/pull-request-00031/workflow-run-23245271393/002-front-panel-overview/head.png"
+    }
+  ]
+}
