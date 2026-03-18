@@ -15,9 +15,9 @@ permissions:
 jobs:
   comparevi-history-agent-canary-evaluate:
     if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
-    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.16
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.17
     with:
       consumer_repository: ${{ github.repository }}
       workflow_run_id: ${{ github.event.workflow_run.id }}
       canary_policy_path: .github/comparevi-history-agent-canary.json
-      platform_ref: v1.3.16
+      platform_ref: v1.3.17
