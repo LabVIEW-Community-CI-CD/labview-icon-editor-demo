@@ -9,15 +9,15 @@ review without running that platform directly from untrusted PR events.
   is the standard automatic changed-VI pull-request surface. It stays thin by forwarding the current repository and the
   checked-in `.github/comparevi-history-pr-policy.json` contract into the reusable
   `comparevi-history` execution workflow pinned to the immutable release
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.10`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.11`.
 - [`.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml)
   is the privileged `workflow_run` follow-on publisher. It reads the execution artifact from the completed pull request
   run and creates or updates the sticky PR comment without checking out or executing candidate PR code through
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@v1.3.10`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@v1.3.11`.
 - [`.github/workflows/comparevi-history-agent-canary-evaluate.yml`](../.github/workflows/comparevi-history-agent-canary-evaluate.yml)
   is the same-repo `workflow_run` evaluator for the governed agent-canary lane. It consumes the checked-in
   `.github/comparevi-history-agent-canary.json` contract and the publication artifact through
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.10`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.11`.
 - [`.github/workflows/comparevi-history-manual-vi-exploration.yml`](../.github/workflows/comparevi-history-manual-vi-exploration.yml)
   is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
@@ -55,7 +55,7 @@ The automatic changed-VI pull-request surface:
 
 - is additive and leaves the manual PR diagnostics, comment-gated diagnostics, manual exploration, corpus pilot, and
   checked-in target catalog unchanged
-- consumes the released `LabVIEW-Community-CI-CD/comparevi-history@v1.3.10` platform surface through the reusable
+- consumes the released `LabVIEW-Community-CI-CD/comparevi-history@v1.3.11` platform surface through the reusable
   workflow entrypoints
 - triggers on `pull_request` for `main`, `develop`, `release/*`, `feature/*`, and `hotfix/*`
 - discovers changed `.vi` files through `comparevi-history/changed-vi-discovery@v2` using the trusted base-branch
@@ -157,8 +157,8 @@ unchanged and continue to use the checked-in target catalog.
 ## Release Contract
 
 - Consumer workflows in this repository must pin immutable `comparevi-history` refs only.
-- The automatic changed-VI PR wrappers pin the released reusable workflow surface and `platform_ref` to `v1.3.10`.
-- The agent-canary evaluation wrapper pins the released reusable workflow surface and `platform_ref` to `v1.3.10`.
+- The automatic changed-VI PR wrappers pin the released reusable workflow surface and `platform_ref` to `v1.3.11`.
+- The agent-canary evaluation wrapper pins the released reusable workflow surface and `platform_ref` to `v1.3.11`.
 - Consumers in this repository must not pin `compare-vi-cli-action` directly.
 - The normal released `comparevi-history` path already resolves its backend from the released
   `compare-vi-cli-action` bundle mapping.
