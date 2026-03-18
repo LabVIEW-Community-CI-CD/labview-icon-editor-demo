@@ -211,6 +211,7 @@ jobs:
         run: |
           $testFiles = @(
             'Tooling/tests/CiPipelineCompositeContract.Tests.ps1',
+            'Tooling/tests/CompareVIHistoryAgentCanary.Tests.ps1',
             'Tooling/tests/CompareVIHistoryWorkflowContracts.Tests.ps1',
             'Tooling/tests/PylaviCompositeContract.Tests.ps1',
             'Tooling/tests/ViAnalyzerCompositeContract.Tests.ps1'

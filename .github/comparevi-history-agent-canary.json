@@ -1,0 +1,31 @@
+{
+  "schema": "comparevi-history/agent-canary-policy@v1",
+  "prIdentification": {
+    "branchPrefix": "agent-canary/",
+    "requiredLabels": [
+      "agent-canary"
+    ]
+  },
+  "targetContract": {
+    "canonicalPath": "Tooling/comparevi-history-canary/CanaryProbe.vi",
+    "expectedChangedViCount": 1,
+    "expectedSelectedTargetCount": 1
+  },
+  "executionContract": {
+    "expectedPublicModes": [
+      "attributes",
+      "front-panel",
+      "block-diagram"
+    ],
+    "expectedNoisePolicy": "include",
+    "expectedFullSurface": "artifact-index"
+  },
+  "publicationContract": {
+    "stickyCommentRequired": true,
+    "requiredStatus": "succeeded"
+  },
+  "promotionContract": {
+    "mergePolicy": "manual-only",
+    "prMode": "draft"
+  }
+}

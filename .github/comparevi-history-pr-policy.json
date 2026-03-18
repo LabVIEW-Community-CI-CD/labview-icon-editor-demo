@@ -5,7 +5,9 @@
     "includePaths": [
       "**/*.vi"
     ],
-    "excludePaths": [],
+    "excludePaths": [
+      "Tooling/comparevi-history-canary/variants/**/*.vi"
+    ],
     "maxChangedViCount": 10,
     "overflowBehavior": "block"
   },
