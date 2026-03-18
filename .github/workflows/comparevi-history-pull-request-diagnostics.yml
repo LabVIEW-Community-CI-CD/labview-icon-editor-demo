@@ -19,9 +19,9 @@ permissions:
 
 jobs:
   comparevi-history-pull-request-diagnostics:
-    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.22
+    uses: LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.23
     with:
       consumer_repository: ${{ github.repository }}
       pr_policy_path: .github/comparevi-history-pr-policy.json
       results_dir: tests/results/pr-diagnostics/history
-      platform_ref: v1.3.22
+      platform_ref: v1.3.23
