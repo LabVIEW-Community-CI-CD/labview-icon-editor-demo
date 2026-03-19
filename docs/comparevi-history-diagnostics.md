@@ -9,15 +9,15 @@ review without running that platform directly from untrusted PR events.
   is the standard automatic changed-VI pull-request surface. It stays thin by forwarding the current repository and the
   checked-in `.github/comparevi-history-pr-policy.json` contract into the reusable
   `comparevi-history` execution workflow pinned to the immutable release
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.23`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-auto.yml@v1.3.24`.
 - [`.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml`](../.github/workflows/comparevi-history-pull-request-diagnostics-publish.yml)
   is the privileged `workflow_run` follow-on publisher. It reads the execution artifact from the completed pull request
   run and creates or updates the sticky PR comment without checking out or executing candidate PR code through
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@v1.3.23`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-publish.yml@v1.3.24`.
 - [`.github/workflows/comparevi-history-agent-canary-evaluate.yml`](../.github/workflows/comparevi-history-agent-canary-evaluate.yml)
   is the same-repo `workflow_run` evaluator for the governed agent-canary lane. It consumes the checked-in
   `.github/comparevi-history-agent-canary.json` contract and the publication artifact through
-  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.23`.
+  `LabVIEW-Community-CI-CD/comparevi-history/.github/workflows/pull-request-diagnostics-canary-evaluate.yml@v1.3.24`.
 - [`.github/workflows/comparevi-history-manual-vi-exploration.yml`](../.github/workflows/comparevi-history-manual-vi-exploration.yml)
   is a maintainer-dispatched workflow for exploring one repo-relative `.vi` path on demand through the published
   reusable `comparevi-history` manual exploration workflow. The wrapper stays thin: it forwards `vi_path`, `ref`,
@@ -55,9 +55,9 @@ The automatic changed-VI pull-request surface:
 
 - is additive and leaves the manual PR diagnostics, comment-gated diagnostics, manual exploration, corpus pilot, and
   checked-in target catalog unchanged
-- consumes the released `LabVIEW-Community-CI-CD/comparevi-history@v1.3.23` platform surface through the reusable
+- consumes the released `LabVIEW-Community-CI-CD/comparevi-history@v1.3.24` platform surface through the reusable
   workflow entrypoints
-- triggers on `pull_request` for `main`, `develop`, `release/*`, `feature/*`, and `hotfix/*`
+- triggers on `pull_request` for `develop`, `release/*`, `feature/*`, and `hotfix/*`
 - discovers changed `.vi` files through `comparevi-history/changed-vi-discovery@v2` using the trusted base-branch
   policy checkout instead of a PR-local script
 - aggregates execution state through `comparevi-history/pr-run@v2`
@@ -172,8 +172,8 @@ unchanged and continue to use the checked-in target catalog.
 ## Release Contract
 
 - Consumer workflows in this repository must pin immutable `comparevi-history` refs only.
-- The automatic changed-VI PR wrappers pin the released reusable workflow surface and `platform_ref` to `v1.3.23`.
-- The agent-canary evaluation wrapper pins the released reusable workflow surface and `platform_ref` to `v1.3.23`.
+- The automatic changed-VI PR wrappers pin the released reusable workflow surface and `platform_ref` to `v1.3.24`.
+- The agent-canary evaluation wrapper pins the released reusable workflow surface and `platform_ref` to `v1.3.24`.
 - Consumers in this repository must not pin `compare-vi-cli-action` directly.
 - The normal released `comparevi-history` path already resolves its backend from the released
   `compare-vi-cli-action` bundle mapping.
@@ -217,6 +217,69 @@ unchanged and continue to use the checked-in target catalog.
    narrow it further.
 7. Use the manual VI exploration workflow when you want the full available revision catalog for a specific repo-relative
    `.vi` path rather than the curated target-id diagnostics contract.
+
+## Local-First Maintainer Loop
+
+The local-first reviewer loop is intentionally separate from the PR publication workflows. Use a local
+`comparevi-history` checkout for reviewer-surface iteration, and keep the GitHub workflows here as the publication and
+trust-boundary proof surfaces.
+
+Recommended local profiles:
+
+1. `dev-fast`
+   - default local refinement profile
+   - uses the local NI-derived acceleration image through the `comparevi-history` facade
+2. `warm-dev`
+   - reuses the same local acceleration image through a warm Docker runtime
+   - intended for repeated turns against the same branch
+3. `proof`
+   - explicit canonical parity profile
+   - keeps the pinned `nationalinstruments/labview:2026q1-linux` runtime when you want CI/release truth
+
+Example local review against one changed VI from a local `comparevi-history` checkout:
+
+```powershell
+pwsh -NoLogo -NoProfile -File C:\dev\comparevi-history\scripts\Invoke-CompareVIHistoryLocalReview.ps1 `
+  -ConsumerRepositoryRoot C:\dev\labview-icon-editor-demo `
+  -ViPath 'Tooling/deployment/VIP_Post-Install Custom Action.vi'
+```
+
+Example repeated-turn warm runtime:
+
+```powershell
+pwsh -NoLogo -NoProfile -File C:\dev\comparevi-history\scripts\Invoke-CompareVIHistoryLocalReview.ps1 `
+  -ConsumerRepositoryRoot C:\dev\labview-icon-editor-demo `
+  -Profile warm-dev `
+  -WarmRuntimeDir tests/results/local-review/runtime `
+  -BaseRef develop `
+  -HeadRef HEAD
+```
+
+Example local proof before opening a PR:
+
+```powershell
+pwsh -NoLogo -NoProfile -File C:\dev\comparevi-history\scripts\Invoke-CompareVIHistoryLocalReview.ps1 `
+  -ConsumerRepositoryRoot C:\dev\labview-icon-editor-demo `
+  -Profile proof `
+  -BaseRef develop `
+  -HeadRef HEAD
+```
+
+For explicit warm-runtime lifecycle control from a local `compare-vi-cli-action` checkout, the backend runtime plane
+also exposes:
+
+```powershell
+node tools/npm/run-script.mjs history:local:warm-runtime
+node tools/npm/run-script.mjs history:local:warm-runtime:status
+node tools/npm/run-script.mjs history:local:warm-runtime:stop
+```
+
+This repository should not redefine local Docker images or local review contracts. The consumer surface stays thin:
+
+- repo-local hosted NI Linux adapter: `Tooling/Invoke-CompareVIHistoryHostedNILinux.ps1`
+- local review/proof facade: `comparevi-history`
+- runtime substrate: `compare-vi-cli-action`
+- publication proof: the checked-in GitHub workflows in this repository
 
 ## See Also
 
