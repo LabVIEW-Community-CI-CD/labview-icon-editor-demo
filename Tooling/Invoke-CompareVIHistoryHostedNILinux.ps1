@@ -129,6 +129,17 @@ function Resolve-HostedCompareRunner {
     return $runnerScript
 }
 
+function Get-ProcessEnvironmentString {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    $value = [System.Environment]::GetEnvironmentVariable($Name, 'Process')
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $null
+    }
+
+    return $value.Trim()
+}
+
 function Resolve-ReportExtension {
     param([Parameter(Mandatory = $true)][string]$ReportTypeValue)
 
@@ -178,6 +189,8 @@ function New-NormalizedCapture {
     param(
         [AllowNull()][psobject]$RunnerCapture,
         [Parameter(Mandatory = $true)][string]$Image,
+        [AllowNull()][string]$RuntimeProfile,
+        [AllowNull()][string]$ReuseContainerName,
         [Parameter(Mandatory = $true)][string]$BaseViPath,
         [Parameter(Mandatory = $true)][string]$HeadViPath,
         [Parameter(Mandatory = $true)][string]$ReportPathValue,
@@ -224,6 +237,10 @@ function New-NormalizedCapture {
         environment = [ordered]@{
             cli = [ordered]@{
                 image = $Image
+                runtime = [ordered]@{
+                    profile = $RuntimeProfile
+                    reuseContainerName = $ReuseContainerName
+                }
                 artifacts = [ordered]@{
                     imageCount = 0
                     images = @()
@@ -248,6 +265,12 @@ $image = if ([string]::IsNullOrWhiteSpace($env:COMPAREVI_NI_LINUX_IMAGE)) {
 } else {
     $env:COMPAREVI_NI_LINUX_IMAGE.Trim()
 }
+$runtimeProfile = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_LOCAL_PROFILE'
+$reuseContainerName = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_REUSE_CONTAINER_NAME'
+$reuseRepoHostPath = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_REUSE_REPO_HOST_PATH'
+$reuseRepoContainerPath = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_REUSE_REPO_CONTAINER_PATH'
+$reuseResultsHostPath = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_REUSE_RESULTS_HOST_PATH'
+$reuseResultsContainerPath = Get-ProcessEnvironmentString -Name 'COMPAREVI_VI_HISTORY_REUSE_RESULTS_CONTAINER_PATH'
 
 New-Item -ItemType Directory -Path $outputDirResolved -Force | Out-Null
 
@@ -267,6 +290,21 @@ if ($resolvedFlags.Count -gt 0) {
 }
 if ($Quiet.IsPresent) {
     $runnerArgs.HeartbeatSeconds = 30
+}
+if (-not [string]::IsNullOrWhiteSpace($reuseContainerName)) {
+    $runnerArgs.ReuseContainerName = $reuseContainerName
+    if (-not [string]::IsNullOrWhiteSpace($reuseRepoHostPath)) {
+        $runnerArgs.ReuseRepoHostPath = $reuseRepoHostPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($reuseRepoContainerPath)) {
+        $runnerArgs.ReuseRepoContainerPath = $reuseRepoContainerPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($reuseResultsHostPath)) {
+        $runnerArgs.ReuseResultsHostPath = $reuseResultsHostPath
+    }
+    if (-not [string]::IsNullOrWhiteSpace($reuseResultsContainerPath)) {
+        $runnerArgs.ReuseResultsContainerPath = $reuseResultsContainerPath
+    }
 }
 
 $runnerCapture = & $runnerScript @runnerArgs -PassThru
@@ -293,6 +331,8 @@ if ((Test-Path -LiteralPath $niCapturePath -PathType Leaf)) {
 $normalizedCapture = New-NormalizedCapture `
     -RunnerCapture $runnerCapture `
     -Image $image `
+    -RuntimeProfile $runtimeProfile `
+    -ReuseContainerName $reuseContainerName `
     -BaseViPath $baseViResolved `
     -HeadViPath $headViResolved `
     -ReportPathValue $reportPathResolved `
