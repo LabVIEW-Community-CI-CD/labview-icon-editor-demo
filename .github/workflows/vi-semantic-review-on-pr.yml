@@ -12,9 +12,9 @@ name: VI Semantic Review on PR
 #     reads the PR number and starts the review workflow in vi-history-suite.
 #     The untrusted VIs are compared later inside the isolated LabVIEW container
 #     on vi-history-suite's self-hosted runner (the existing, deliberate model).
-#   * It is gated to trusted contributors (OWNER/MEMBER/COLLABORATOR) so an
-#     arbitrary fork PR cannot spend the self-hosted LabVIEW runner. Untrusted
-#     PRs fall back to the maintainer dispatch / comment path.
+#   * The dispatch step is gated to trusted contributors (OWNER/MEMBER/
+#     COLLABORATOR) so an arbitrary fork PR cannot spend the self-hosted LabVIEW
+#     runner. Untrusted PRs fall back to the maintainer dispatch / comment path.
 
 on:
   pull_request_target:
@@ -31,13 +31,25 @@ jobs:
   dispatch-vi-review:
     name: Dispatch VI semantic review
     runs-on: ubuntu-latest
-    # Only trusted authors auto-trigger the self-hosted LabVIEW review.
-    if: >-
-      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
-      github.event.pull_request.author_association)
     timeout-minutes: 5
     steps:
+      - name: Evaluate trust gate
+        id: gate
+        env:
+          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+        run: |
+          echo "PR author association: '$ASSOCIATION'"
+          case "$ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR)
+              echo "trusted=true" >> "$GITHUB_OUTPUT"
+              echo "Trusted contributor: auto-review will be dispatched." ;;
+            *)
+              echo "trusted=false" >> "$GITHUB_OUTPUT"
+              echo "Untrusted contributor: skipping auto-review (use the maintainer dispatch/comment path)." ;;
+          esac
+
       - name: Dispatch the review in vi-history-suite
+        if: ${{ steps.gate.outputs.trusted == 'true' }}
         env:
           # Least-privilege token with `actions: write` on vi-history-suite —
           # only enough to start the review workflow. The review posts back to
