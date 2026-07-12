@@ -38,9 +38,13 @@ jobs:
         env:
           # The pull_request_target payload's author_association is unreliable
           # for fork PRs (it reports CONTRIBUTOR/NONE even for org members), so
-          # resolve the actor's real permission on this repo via the API using
-          # the dispatch token. admin/write/maintain => trusted.
-          GH_TOKEN: ${{ secrets.VI_REVIEW_DISPATCH_TOKEN }}
+          # resolve the actor's real permission on this repo via the API.
+          # Use THIS repo's own GITHUB_TOKEN: it has metadata read on the repo
+          # where the PR lives. The least-privilege VI_REVIEW_DISPATCH_TOKEN
+          # only has actions:write on vi-history-suite and cannot read this
+          # repo's collaborators, so using it here would fail closed and skip
+          # even trusted authors. admin/write/maintain => trusted.
+          GH_TOKEN: ${{ github.token }}
           ACTOR: ${{ github.event.pull_request.user.login }}
           TARGET_REPOSITORY: ${{ github.repository }}
         run: |
