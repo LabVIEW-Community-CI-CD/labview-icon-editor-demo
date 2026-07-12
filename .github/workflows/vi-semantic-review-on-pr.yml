@@ -1,8 +1,8 @@
 name: VI Semantic Review on PR
 
 # Auto-trigger the VI semantic PR review (hosted in vi-history-suite) whenever a
-# pull request is opened/updated against this repository — including PRs from
-# forks — so contributors get the LabVIEW "what changed" sticky comment without
+# pull request is opened/updated against this repository - including PRs from
+# forks - so contributors get the LabVIEW "what changed" sticky comment without
 # manually commenting or labelling.
 #
 # Security model:
@@ -12,9 +12,9 @@ name: VI Semantic Review on PR
 #     reads the PR number and starts the review workflow in vi-history-suite.
 #     The untrusted VIs are compared later inside the isolated LabVIEW container
 #     on vi-history-suite's self-hosted runner (the existing, deliberate model).
-#   * The dispatch step is gated to trusted contributors (OWNER/MEMBER/
-#     COLLABORATOR) so an arbitrary fork PR cannot spend the self-hosted LabVIEW
-#     runner. Untrusted PRs fall back to the maintainer dispatch / comment path.
+#   * The dispatch step is gated to trusted contributors (repo push/admin/
+#     maintain permission) so an arbitrary fork PR cannot spend the self-hosted
+#     LabVIEW runner. Untrusted PRs fall back to the maintainer dispatch path.
 
 on:
   pull_request_target:
@@ -36,22 +36,29 @@ jobs:
       - name: Evaluate trust gate
         id: gate
         env:
-          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          # The pull_request_target payload's author_association is unreliable
+          # for fork PRs (it reports CONTRIBUTOR/NONE even for org members), so
+          # resolve the actor's real permission on this repo via the API using
+          # the dispatch token. admin/write/maintain => trusted.
+          GH_TOKEN: ${{ secrets.VI_REVIEW_DISPATCH_TOKEN }}
+          ACTOR: ${{ github.event.pull_request.user.login }}
+          TARGET_REPOSITORY: ${{ github.repository }}
         run: |
-          echo "PR author association: '$ASSOCIATION'"
-          case "$ASSOCIATION" in
-            OWNER|MEMBER|COLLABORATOR)
+          permission="$(gh api "repos/$TARGET_REPOSITORY/collaborators/$ACTOR/permission" --jq '.permission' 2>/dev/null || echo none)"
+          echo "PR author: $ACTOR - permission on $TARGET_REPOSITORY: '$permission'"
+          case "$permission" in
+            admin|write|maintain)
               echo "trusted=true" >> "$GITHUB_OUTPUT"
               echo "Trusted contributor: auto-review will be dispatched." ;;
             *)
               echo "trusted=false" >> "$GITHUB_OUTPUT"
-              echo "Untrusted contributor: skipping auto-review (use the maintainer dispatch/comment path)." ;;
+              echo "Untrusted contributor: skipping auto-review (use the maintainer dispatch path)." ;;
           esac
 
       - name: Dispatch the review in vi-history-suite
         if: ${{ steps.gate.outputs.trusted == 'true' }}
         env:
-          # Least-privilege token with `actions: write` on vi-history-suite —
+          # Least-privilege token with `actions: write` on vi-history-suite -
           # only enough to start the review workflow. The review posts back to
           # this PR using vi-history-suite's own VI_REVIEW_TARGET_TOKEN, so this
           # repo never holds a target-write token.
