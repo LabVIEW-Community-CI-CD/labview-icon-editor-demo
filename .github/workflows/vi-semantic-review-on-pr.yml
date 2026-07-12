@@ -1,0 +1,55 @@
+name: VI Semantic Review on PR
+
+# Auto-trigger the VI semantic PR review (hosted in vi-history-suite) whenever a
+# pull request is opened/updated against this repository — including PRs from
+# forks — so contributors get the LabVIEW "what changed" sticky comment without
+# manually commenting or labelling.
+#
+# Security model:
+#   * pull_request_target runs in the BASE repo context with access to secrets,
+#     which fork `pull_request` events do not get, so it can dispatch the review.
+#   * This job NEVER checks out or executes the untrusted fork code. It only
+#     reads the PR number and starts the review workflow in vi-history-suite.
+#     The untrusted VIs are compared later inside the isolated LabVIEW container
+#     on vi-history-suite's self-hosted runner (the existing, deliberate model).
+#   * It is gated to trusted contributors (OWNER/MEMBER/COLLABORATOR) so an
+#     arbitrary fork PR cannot spend the self-hosted LabVIEW runner. Untrusted
+#     PRs fall back to the maintainer dispatch / comment path.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vi-semantic-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch-vi-review:
+    name: Dispatch VI semantic review
+    runs-on: ubuntu-latest
+    # Only trusted authors auto-trigger the self-hosted LabVIEW review.
+    if: >-
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
+      github.event.pull_request.author_association)
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch the review in vi-history-suite
+        env:
+          # Least-privilege token with `actions: write` on vi-history-suite —
+          # only enough to start the review workflow. The review posts back to
+          # this PR using vi-history-suite's own VI_REVIEW_TARGET_TOKEN, so this
+          # repo never holds a target-write token.
+          GH_TOKEN: ${{ secrets.VI_REVIEW_DISPATCH_TOKEN }}
+          TARGET_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Dispatching VI semantic review for $TARGET_REPOSITORY#$PR_NUMBER"
+          gh workflow run vi-semantic-pr-review.yml \
+            --repo LabVIEW-Community-CI-CD/vi-history-suite \
+            --ref develop \
+            -f repository="$TARGET_REPOSITORY" \
+            -f pr_number="$PR_NUMBER"
